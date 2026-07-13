@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: 2D game demolition-tool animation sprite sheet
+Primary request: Create a six-frame animation of one sturdy demolition hammer striking downward. The action progression must be: frame 1 resting upright, frame 2 raised back, frame 3 swinging down, frame 4 hammer head impacts the ground, frame 5 small rebound, frame 6 returns to resting pose.
+Scene/backdrop: perfectly flat solid #00ff00 chroma-key background, no shadow, no floor, no texture, no gradient.
+Subject: one compact wooden-handled construction hammer with a dark steel head, warm orange-brown handle, dark navy pixel outline, no hands and no character.
+Style/medium: crisp low-resolution hand-painted pixel art matching the Tiny Swords game UI and building icons, chunky readable silhouette, limited warm palette.
+Composition/framing: exact 3 columns by 2 rows grid, read left-to-right across the first row then left-to-right across the second row; one complete hammer per cell; equal cell sizes; generous padding; stable pivot near the lower center; no overlap between cells.
+Constraints: the same hammer identity, size and colors in every frame; all six hammers fully visible; motion changes only pose and angle; no text, no numbers, no watermark, no grid lines; do not use #00ff00 anywhere on the hammer.
+Avoid: realistic rendering, smooth vector art, motion blur, hands, characters, debris covering the hammer, extra tools, background objects.

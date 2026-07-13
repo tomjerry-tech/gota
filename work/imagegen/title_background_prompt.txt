@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: 16:9 game title-screen background
+Primary request: Create a polished pixel-art cover background for a cozy top-down shepherd management game named Shepherd Island. Match the visual language of a Tiny Swords-compatible Godot pasture: crisp square pixels, compact readable silhouettes, restrained outlines, and the same gameplay-scale proportions.
+Scene/backdrop: A small rounded grass island surrounded by clear turquoise water, with visible grassy cliff edges, a few scattered soft white clouds, one leafy tree, two bushes, several small stones, and patches of gently swaying green grass.
+Subject: Six small cream-white sheep with charcoal faces naturally grazing, resting, and walking. One black-haired female shepherd with large round black glasses and a cream-white quilted jacket stands near the flock. Keep every character at believable in-game scale and show the full island rather than a character portrait.
+Style/medium: Crisp top-down three-quarter 2D pixel art, cozy management-game key art, consistent pixel density, clean sprite-like shapes, no painterly rendering.
+Composition/framing: Wide 1280x720 landscape. The pasture is centered slightly below the vertical midpoint. Preserve calm open sky-and-water space in the upper center for a title and a quiet lower-center area for menu buttons. Keep important sheep and the shepherd away from those UI areas.
+Lighting/mood: Bright calm early morning, clear readable colors, gentle pastoral atmosphere.
+Color palette: Fresh grass greens, turquoise water, white clouds, cream sheep wool, charcoal sheep faces, small warm wood and stone accents. Avoid a one-color blue or green wash.
+Constraints: No text, letters, logo, menu buttons, watermark, gradient background, blur, photorealism, painterly brushwork, oversized characters, castles, soldiers, weapons, battle effects, fantasy monsters, dramatic fog, or dark vignette. Do not redesign the specified sheep or shepherd. The image must work as a full-bleed title background with Godot UI over it.

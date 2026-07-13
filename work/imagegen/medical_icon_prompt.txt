@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: small 2D game UI icon
+Primary request: Create one compact veterinary medical bag icon for a sheep farming game. The bag is navy blue with pale cream side panels and a bright red-orange medical cross on the front.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no shadow or floor.
+Style/medium: crisp low-resolution hand-painted pixel art matching the Tiny Swords UI icon set: chunky silhouette, dark navy outline, limited palette, readable at 48x48 pixels.
+Composition/framing: one centered medical bag, three-quarter view, generous padding, full object visible.
+Constraints: no text, no watermark, no extra objects, do not use #02f903 on the bag.
+Avoid: realistic rendering, smooth vector art, gradients, background texture, bottles, characters.

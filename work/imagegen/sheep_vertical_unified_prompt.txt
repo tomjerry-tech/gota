@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: 2D game sprite sheet for a Godot pixel-art game
+Primary request: Create exactly 8 frames in a 4 columns by 2 rows grid for one consistent sheep. Top row: four frames walking away from the camera, showing the woolly back. Bottom row: four frames walking toward the camera, showing the face. Keep the exact same character design and proportions as this specification in every frame.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background with no shadows or texture.
+Subject design: cream-white fluffy wool with warm tan pixel highlights, charcoal-gray face and ears, a small warm amber eye rim on the front-facing frames, dark gray legs and tail, dark warm-brown pixel outline.
+Style/medium: crisp detailed hand-painted pixel art, matching a polished Godot game sprite; do not use the old tiny low-detail Tiny Swords style.
+Composition/framing: each cell 256x256, generous padding, no overlap, consistent ground center and character scale.
+Constraints: exactly eight frames, no labels, no text, no watermark, no scenery, do not use the green key color on the sheep.
+Avoid: extra sheep, grass, props, grid lines, shadows, gradients, inconsistent character design, cropped body.

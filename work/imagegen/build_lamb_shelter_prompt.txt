@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: small 2D build-menu card icon
+Primary request: Create one small lamb shelter for a pastoral island game. It is a cozy cream-and-warm-brown wooden shed with a muted teal-blue roof, open front, low fenced sleeping area, and a small white wool emblem above the entrance.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor, no shadow.
+Style/medium: crisp low-resolution hand-painted pixel art matching Tiny Swords buildings and UI icons; chunky readable silhouette, dark navy-brown outline, limited palette, top-down three-quarter view.
+Composition/framing: one centered shelter, full object visible, generous padding, readable at 64x64 pixels.
+Constraints: no sheep, no text, no watermark, no scenery, do not use #02f903 on the building.
+Avoid: realistic rendering, smooth vector art, gradients, background texture, multiple buildings.

@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: definitive character reference for a 2D Godot pixel-art game
+Primary request: Create one adult sheep character that will be the exact visual reference for every animation in the game. Show a clean three-quarter side view facing right, standing naturally.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor, no shadow, no texture.
+Subject design: compact rounded adult sheep; fluffy cream-white wool with warm beige shadow clusters; charcoal-gray face, long ears, short legs and small tail; one tiny amber eye pixel; calm friendly expression; dark warm-brown 1-2 pixel outline. The head is proportional and not oversized.
+Style/medium: deliberate low-resolution hand-drawn pixel art designed to remain readable at about 52 by 47 visible pixels in a 128 by 128 frame; limited palette; crisp hard pixel edges; no antialiased illustration look; compatible with a bright top-down island game.
+Composition/framing: one sheep only, centered, full body visible, generous empty padding.
+Constraints: this is the master model sheet; no extra poses, no text, no watermark, no scenery, do not use #02f903 on the sheep.
+Avoid: multiple sheep, realistic fur, smooth vector art, painterly shading, huge glossy eyes, accessories, grass, ground shadow, gradients.

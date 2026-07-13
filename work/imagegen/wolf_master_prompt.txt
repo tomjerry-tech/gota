@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: definitive wolf character reference for a 2D Godot pixel-art game
+Input image: Image 1 is the existing adult sheep master. Use it only as a reference for pixel technique, top-down three-quarter camera, outline weight, visual scale, lighting simplicity, and chroma-key presentation. Replace the sheep completely; do not retain wool, horns, sheep anatomy, or sheep facial features.
+Primary request: Create one gray wolf that will be the exact visual reference for every wolf animation in the game. Show a clean three-quarter side view facing right, standing alert with all four feet planted.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, uniform edge to edge, with no floor, no shadow, no texture, no gradient, and no lighting variation.
+Subject design: a low, lean wolf with a long body, pointed upright ears, long full tail, narrow muzzle, and firm but readable silhouette. Use cool medium-gray fur, deep charcoal-gray back and legs, pale gray belly, muzzle and eyebrow patches, one tiny muted amber eye, and a dark navy-brown 1-2 pixel outline. The expression is alert and dangerous enough to read as a predator, but still suitable for a friendly pastoral game.
+Style/medium: deliberate low-resolution hand-drawn pixel art compatible with the existing sheep and Tiny Swords top-down island assets; limited palette; two or three shade steps; crisp hard pixel clusters; no antialiased vector look; designed to remain readable at about 64 by 48 visible pixels in a 128 by 128 frame.
+Composition/framing: one wolf only, centered, full body visible, generous empty padding, stable bottom-center foot anchor.
+Constraints: this image is the immutable wolf identity reference for later animations; no extra poses, no text, no numbers, no watermark, no scenery, no grass, no sheep, no blood, no wounds; do not use #02f903 anywhere on the wolf.
+Avoid: realistic fur strands, painterly shading, smooth vector edges, huge teeth, red eyes, oversized head, fox proportions, dog-like floppy ears, cast shadow, ground plane, gradients, extra animals.

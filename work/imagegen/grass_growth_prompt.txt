@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: 2D game sprite sheet
+Primary request: Create a pixel-art grass plant growth sprite sheet with 4 separate frames in one horizontal row: freshly eaten short brown-green stem, tiny bright green sprout, half-grown tuft, and full mature tuft of grass. Keep the plant centered and the same footprint in each cell.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no shadows or texture.
+Style/medium: crisp hand-painted pixel art matching a Tiny Swords-inspired top-down game.
+Composition/framing: 4 cells, each 256x256, generous padding, no overlap.
+Constraints: exactly four stages left to right, no labels, no text, no watermark, do not use the green key color on the plants.
+Avoid: soil, rocks, flowers, scenery, grid lines, shadows, gradients.

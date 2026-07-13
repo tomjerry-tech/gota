@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: 2D game directional walk sprite sheet derived from the supplied master sheep reference
+Primary request: Preserve the exact sheep identity, palette, wool shapes, proportions, outline thickness and pixel density from the input image. Create exactly 8 walking frames in a 4 columns by 2 rows grid. Top row: four-frame walk cycle moving upward away from the camera, showing the back and tail. Bottom row: four-frame walk cycle moving downward toward the camera, showing the charcoal face and tiny amber eyes.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor or shadow.
+Composition: 4 equal columns by 2 equal rows, identical scale, stable center and ground contact.
+Constraints: same adult sheep in every frame, crisp low-resolution pixel art, no text, no watermark.
+Avoid: side view in these frames, redesigning the sheep, extra sheep, grid lines, shadows, smooth illustration.

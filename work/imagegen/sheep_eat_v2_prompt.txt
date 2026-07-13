@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: 2D game eating sprite sheet derived from the supplied master sheep reference
+Primary request: Preserve the exact sheep identity, palette, wool shapes, face proportions, outline thickness and pixel density from the input image. Create exactly 12 sequential eating frames in a 6 columns by 2 rows grid, read left to right across the top row then left to right across the bottom row. Frames 1-2: the sheep takes the final small steps toward food while facing right. Frames 3-5: the head lowers once toward the ground. Frames 6-12: the head stays low continuously while the mouth chews; a few clearly visible green grass blades remain held in or immediately touching the mouth. Do not raise the head again after frame 5.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor or shadow.
+Composition: identical character scale and stable feet baseline; 6 equal columns by 2 equal rows.
+Constraints: one continuous action, no up-down-up head oscillation, same adult sheep in all frames, grass only as a tiny mouthful, crisp low-resolution pixel art, no text or watermark.
+Avoid: alternating standing and lowered poses, a separate grass plant, redesigning the sheep, extra sheep, grid lines, shadows, smooth illustration.

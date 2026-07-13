@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: production game interaction animation sprite sheet
+Input image: the supplied shepherd turnaround is the strict character master. Preserve exactly the same young woman, outfit, palette, proportions, pixel density, camera, outline, and hair silhouette in every frame.
+Primary request: create a six-frame crouch-and-tend interaction for caring for a sheep just outside the sprite frame.
+Action: right-facing standing pose, bend and crouch, extend one gentle open hand downward, make a short petting or health-check motion, withdraw the hand, begin standing. The implied sheep is off-screen and must not be drawn.
+Style/medium: polished hand-authored pixel art closely compatible with Tiny Swords; crisp pixel clusters; dark charcoal-brown outline; restrained two-to-three-tone shading.
+Composition/framing: exact single horizontal row of 6 isolated chronological full-body frames from left to right. Equal cells; identical scale and ground anchor; enough padding for the crouch and hand extension; no overlap, grid lines, or labels.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background with no shadow, gradient, texture, or floor.
+Constraints: same identity, glasses, long black hair, cream-white quilted jacket, pale trousers, and light shoes throughout; no visible sheep, tools, props, text, logo, watermark, or #ff00ff in the character.
+Avoid: kneeling on both knees, shears, medicine, outfit drift, identity drift, duplicated limbs, scenery, cast shadows, anti-aliased illustration.

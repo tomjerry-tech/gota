@@ -1,0 +1,7 @@
+Use case: identity-preserve
+Asset type: 4-frame shepherd dog guard sprite sheet for a 2D Godot pixel-art game
+Input image: Image 1 is the immutable shepherd dog identity reference. Preserve its exact warm sable and cream palette, blue collar, markings, anatomy, proportions, outline thickness, eye, camera angle, and pixel density.
+Primary request: Create exactly 4 right-facing frames in a strict 2-column by 2-row grid forming a subtle guard loop: attentive stance, body lowers, ears and chest brace forward, return toward attentive stance. Keep all four feet planted and show controlled protective tension.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor, shadow, texture, gradient, grid lines, sound symbols, or lighting variation.
+Composition: one complete dog per equal cell, identical scale, stable bottom-center foot anchor, generous padding, no overlap.
+Constraints: exactly 4 frames; preserve the blue collar in every frame; no wolf or other target, extra animals, text, numbers, borders, scenery, blood, wounds, or watermark; do not use #02f903 on the dog.

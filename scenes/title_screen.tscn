@@ -1,0 +1,154 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/title_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/title/title_background.png" id="2_background"]
+
+[node name="TitleScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.03, 0.08, 0.07, 0.12)
+
+[node name="TitleRibbon" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 380.0
+offset_top = 38.0
+offset_right = 900.0
+offset_bottom = 166.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="TitleRibbon"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.941, 0.69, 1)
+theme_override_colors/font_shadow_color = Color(0.09, 0.14, 0.22, 1)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 54
+text = "牧羊小岛"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MenuPanel" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 900.0
+offset_top = 390.0
+offset_right = 1245.0
+offset_bottom = 676.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ContinueButton" type="Button" parent="MenuPanel"]
+layout_mode = 0
+offset_left = 52.0
+offset_top = 35.0
+offset_right = 292.0
+offset_bottom = 87.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.94, 0.66, 1)
+theme_override_colors/font_disabled_color = Color(0.58, 0.64, 0.66, 1)
+theme_override_colors/font_shadow_color = Color(0.08, 0.12, 0.18, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+text = "继续游戏"
+
+[node name="NewGameButton" type="Button" parent="MenuPanel"]
+layout_mode = 0
+offset_left = 52.0
+offset_top = 115.0
+offset_right = 292.0
+offset_bottom = 167.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.94, 0.98, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.94, 0.66, 1)
+theme_override_colors/font_shadow_color = Color(0.08, 0.12, 0.18, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+text = "开始新游戏"
+
+[node name="ExitButton" type="Button" parent="MenuPanel"]
+layout_mode = 0
+offset_left = 52.0
+offset_top = 195.0
+offset_right = 292.0
+offset_bottom = 247.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.91, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.94, 0.66, 1)
+theme_override_colors/font_shadow_color = Color(0.14, 0.06, 0.05, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+text = "退出游戏"
+
+[node name="Confirmation" type="Panel" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 440.0
+offset_top = 286.0
+offset_right = 840.0
+offset_bottom = 494.0
+
+[node name="Message" type="Label" parent="Confirmation"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 28.0
+offset_right = 366.0
+offset_bottom = 111.0
+theme_override_colors/font_color = Color(0.24, 0.17, 0.13, 1)
+theme_override_font_sizes/font_size = 19
+text = "开始新游戏会删除现有存档，确定继续吗？"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ConfirmButton" type="Button" parent="Confirmation"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 133.0
+offset_right = 184.0
+offset_bottom = 181.0
+text = "删除并开始"
+
+[node name="CancelButton" type="Button" parent="Confirmation"]
+layout_mode = 0
+offset_left = 216.0
+offset_top = 133.0
+offset_right = 358.0
+offset_bottom = 181.0
+text = "取消"

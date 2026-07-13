@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: 2D game sprite sheet derived from the supplied master sheep reference
+Primary request: Preserve the exact sheep identity, palette, wool shapes, face proportions, outline thickness and pixel density from the input image. Create exactly 6 standing-idle frames in one horizontal row. The sheep faces right, keeps all four feet planted, breathes subtly and blinks once. No walking and no large head movement.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor or shadow.
+Composition: 6 equal cells in one row, identical character scale and centered footprint in every cell.
+Constraints: change only the tiny idle motion; same adult sheep in all frames; crisp low-resolution pixel art; no text, no watermark, no scenery.
+Avoid: redesigning the sheep, changing eye color, changing wool color, smooth illustration, extra sheep, grid lines, shadows.

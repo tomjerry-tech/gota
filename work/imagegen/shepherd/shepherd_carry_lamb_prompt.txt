@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: production game interaction animation sprite sheet
+Input image: the supplied shepherd turnaround is the strict character master. Preserve exactly the same young woman, outfit, palette, proportions, pixel density, camera, outline, and hair silhouette in every frame.
+Primary request: create a six-frame lift-and-hold-lamb interaction for the shepherd girl.
+Action: front-right three-quarter pose, crouch toward a very small cream lamb, place both hands safely beneath it, lift smoothly, and finish standing while holding the calm lamb securely against the front of her cream jacket. Clear chronological progression.
+Style/medium: polished hand-authored pixel art closely compatible with Tiny Swords; crisp pixel clusters; dark charcoal-brown outline; restrained two-to-three-tone shading.
+Composition/framing: exact single horizontal row of 6 isolated chronological full-body frames from left to right. Equal cells; identical character scale and ground anchor; generous padding; no overlap, grid lines, or labels.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background with no shadow, gradient, texture, or floor.
+Constraints: same shepherd identity, glasses, long black hair, cream-white quilted jacket, pale trousers, and light shoes throughout; only one small cream lamb; lamb style and scale match the existing game sheep; no tools, text, logo, watermark, or #ff00ff in either subject.
+Avoid: adult oversized sheep, unsafe grip, extra animals, outfit drift, identity drift, duplicated limbs, scenery, cast shadows, anti-aliased illustration.

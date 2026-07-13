@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: 2D pixel-art game map prop
+Input image 1: style reference for the project's wooden dog house
+Input image 2: style reference for the project's lamb shelter and its top-down camera angle
+Primary request: create a small abandoned wolf den discovered at the outer edge of a pasture island
+Subject: a low dark rocky cave opening under a rough mound of gray stones, a few dry twigs and two small pale bones near the entrance, no wolf visible
+Style/medium: polished Tiny Swords-style top-down 2D pixel art, chunky readable pixels, dark outlines, restrained gray stone and muted brown palette
+Composition/framing: one compact den centered, three-quarter top-down view matching the input buildings, generous empty padding
+Scene/backdrop: perfectly flat solid #00ff00 chroma-key background
+Constraints: one den only; readable at roughly 110 pixels wide in game; no text; no characters; no grass floor; no cast shadow; no watermark; do not use #00ff00 in the subject
+Avoid: horror, blood, photorealism, smooth vector art, huge mountain cave, extra buildings, blur, anti-pixel smoothing

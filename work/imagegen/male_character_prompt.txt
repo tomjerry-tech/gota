@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: game character turnaround sprite concept
+Input image: the left portion is the identity and clothing reference photo; the right portion is a Tiny Swords pixel-art scale and rendering reference. Use the young man on the far left of the photo as the subject. Use the sprite only for visual language, proportions, camera angle, outline, pixel density, and shading.
+Primary request: design the male playable shepherd character for the existing pastoral game as a consistent four-direction standing turnaround sheet.
+Subject: young East Asian man with short straight black hair and neat fringe, thin round metal glasses, brown varsity jacket with cream-white sleeves and striped collar, black inner shirt, dark practical trousers, and brown farm boots. Preserve his recognizable glasses, hairstyle, gentle facial impression, and brown-and-white jacket color blocking, simplified for pixel art.
+Style/medium: polished hand-authored pixel art closely compatible with Tiny Swords; cute compact proportions; large readable head; small body; dark navy-brown outline; restrained two-to-three-tone shading; crisp pixel clusters; no painterly rendering and no smooth vector edges.
+Composition/framing: exact 2x2 grid containing four isolated full-body neutral standing views of the same character: front/down, back/up, left, right. One character per equal cell, identical scale and foot anchor, generous empty padding, no overlap, no grid lines, no labels.
+Camera: top-down three-quarter game camera matching Tiny Swords, not eye-level portrait view.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background, uniform across the entire image with no shadow, gradient, texture, floor, or lighting variation.
+Constraints: keep identity, outfit, glasses, body proportions, palette, and pixel technique identical across all four views; make the glasses readable but not oversized; full body visible in every cell; no props, no weapon, no text, no logo, no watermark; do not use #ff00ff anywhere in the character.
+Avoid: photorealism, anime illustration, 3D render, anti-aliased painterly edges, different outfits, duplicated limbs, floating accessories, cast shadows, decorative background, extra characters.

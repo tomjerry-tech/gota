@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: 2D game directional walk sprite sheet derived from the supplied master sheep reference
+Primary request: Preserve the exact sheep identity, palette, wool shapes, face proportions, outline thickness and pixel density from the input image. Create exactly 4 side-view walking frames in one horizontal row. The sheep walks to the right in a natural four-step loop. Left movement will be produced by mirroring these frames, so keep the side view readable and consistent.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor or shadow.
+Composition: 4 equal cells in one row, identical scale, stable center and baseline.
+Constraints: same adult sheep in every frame, complete four-step loop, crisp low-resolution pixel art, no text, no watermark.
+Avoid: running, jumping, redesigning the sheep, extra sheep, grid lines, shadows, smooth illustration.

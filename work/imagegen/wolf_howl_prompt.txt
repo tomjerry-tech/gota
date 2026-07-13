@@ -1,0 +1,7 @@
+Use case: identity-preserve
+Asset type: 6-frame wolf howl sprite sheet for a 2D Godot pixel-art game
+Input image: Image 1 is the immutable wolf identity reference. Preserve its exact anatomy, cool-gray palette, markings, proportions, outline thickness, eye, camera angle, and pixel density.
+Primary request: Create exactly 6 right-facing frames in a strict 3-column by 2-row grid: alert stance, head begins to rise, muzzle lifts, full howl pose, head lowers, return to alert stance. Keep all four feet planted. The action must read without sound.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor, shadow, texture, gradient, grid lines, moon, sound symbols, or lighting variation.
+Composition: one complete wolf per equal cell, identical scale, stable bottom-center foot anchor, generous padding, no overlap.
+Constraints: exactly 6 frames; do not redesign the wolf; no extra animals, text, numbers, borders, scenery, blood, wounds, or watermark; do not use #02f903 on the wolf.

@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: 2D game rest sprite sheet derived from the supplied master sheep reference
+Primary request: Preserve the exact sheep identity, palette, wool shapes, face proportions, outline thickness and pixel density from the input image. Create exactly 12 sequential rest frames in a 6 columns by 2 rows grid. Frames 1-6: the standing sheep faces right and lowers its body once into a comfortable prone position on the ground. Frames 7-12: it remains lying low on the ground with eyes relaxed and only a subtle breathing loop. It must not stand up again within this sheet.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor or shadow.
+Composition: stable center and character scale; 6 equal columns by 2 equal rows.
+Constraints: same adult sheep in every frame, clear one-way stand-to-prone transition, crisp low-resolution pixel art, no text, no watermark, no scenery.
+Avoid: curled ball pose, sitting upright, repeated standing and lying, redesigning the sheep, extra sheep, grid lines, shadows.

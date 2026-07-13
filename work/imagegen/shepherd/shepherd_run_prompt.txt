@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: production game animation sprite sheet
+Input image: the supplied shepherd turnaround is the strict character master. Preserve exactly the same young woman, outfit, palette, proportions, pixel density, camera, outline, and hair silhouette in every frame.
+Primary request: create an energetic but cute four-direction run cycle for the shepherd girl.
+Action: clear alternating strides, bent elbows, modest forward lean, jacket bounce, and readable long-hair follow-through. The cycle must loop cleanly and keep the character centered.
+Style/medium: polished hand-authored pixel art closely compatible with Tiny Swords; crisp pixel clusters; dark charcoal-brown outline; restrained two-to-three-tone shading; no painterly or smooth vector rendering.
+Composition/framing: exact 4-row by 8-column sprite grid, 32 isolated full-body frames. Rows from top to bottom: running front/down, running back/up, running left, running right. Eight chronological frames per row from left to right. Every cell equal size; identical scale and baseline; generous padding; no overlap, grid lines, or labels.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background with no shadow, gradient, texture, or floor.
+Constraints: same identity, glasses, long black hair, cream-white quilted jacket, pale trousers, and light shoes in all frames; no props, sheep, text, logo, watermark, or #ff00ff in the character.
+Avoid: walking-only poses, extreme athletic motion, camera changes, outfit drift, identity drift, duplicated limbs, mismatched frame sizes, scenery, cast shadows, anti-aliased illustration.

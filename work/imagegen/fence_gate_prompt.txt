@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: 2D pixel-art game building sprite
+Input image 1: exact style reference for the existing wooden fence segment
+Primary request: create one clearly recognizable wooden pasture gate leaf that belongs to the same fence set
+Subject: a horizontal warm-brown timber gate leaf, two horizontal rails, one strong diagonal brace, a small dark iron latch on the right, no support posts
+Style/medium: polished Tiny Swords-style top-down 2D pixel art, chunky pixels, dark brown outline, the same wood colors and lighting as Input image 1
+Composition/framing: single gate centered, straight horizontal side view with slight top-down visibility, generous empty padding, designed to rotate open around its left end
+Scene/backdrop: perfectly flat solid #00ff00 chroma-key background
+Constraints: one object only; clean readable silhouette; no text; no characters; no grass; no ground; no shadow; no watermark; do not use #00ff00 in the gate
+Avoid: photorealism, smooth vector art, multiple gates, fence posts, perspective distortion, blur, anti-pixel smoothing

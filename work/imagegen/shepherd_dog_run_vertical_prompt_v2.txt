@@ -1,0 +1,9 @@
+Use case: identity-preserve
+Asset type: 8-frame vertical-running shepherd dog sprite sheet for a 2D Godot pixel-art game
+Input image: Image 1 is the immutable shepherd dog identity reference. Copy this exact individual dog. Preserve its oversized rounded puppy head, short compact muzzle, short sturdy legs, compact torso, semi-folded ear tips, low full tail, warm sable-brown and cream markings, blue collar, outline thickness, and pixel density while changing only the view direction and running pose.
+Primary request: Create exactly 8 frames in a strict 4-column by 2-row grid. Top row: four-frame run cycle moving straight up and away from the camera, showing the compact back and tail. Bottom row: four-frame run cycle moving straight down and toward the camera, showing the same friendly face and short muzzle. Each row must loop cleanly.
+Camera: top-down three-quarter game view matching the reference, never eye-level.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor, shadow, texture, gradient, grid lines, or lighting variation.
+Composition: one complete dog per equal cell, identical scale and body volume, stable bottom-center foot anchor, generous padding, no overlap.
+Constraints: identity preservation is more important than anatomical realism; exactly 8 frames; preserve the blue collar and exact markings in every frame; preserve the same short-legged compact puppy-like body; clear rear and front views; no extra animals, text, numbers, borders, scenery, blood, wounds, or watermark; do not use #02f903 on the dog.
+Avoid: adult German shepherd anatomy, long narrow muzzle, tall legs, oversized upright ears, long realistic body, realistic fur strands, changed face, changed markings, changed collar.

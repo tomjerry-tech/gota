@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: 2D game sprite sheet
+Primary request: Create a consistent pixel-art sheep character sprite sheet for a Tiny Swords-inspired top-down shepherd game. Show a 2 by 4 grid with 8 separate walking frames: top row sheep walking upward away from the camera, bottom row sheep walking downward toward the camera. Keep the exact same sheep design, scale, and centered bounding box in every frame.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no shadows or texture.
+Subject: cute small white wool sheep with dark charcoal face, ears, legs, and tiny tail; top-down three-quarter pixel art.
+Style/medium: crisp hand-painted pixel art, clean readable silhouette, matching a 128x128 game sprite.
+Composition/framing: each cell 256x256, generous padding, no overlap between cells.
+Constraints: 8 distinct animation frames in a clean regular grid, no labels, no text, no watermark, do not use the green key color on the sheep.
+Avoid: extra sheep, scenery, grass, props, grid lines, shadows, gradients, inconsistent proportions.

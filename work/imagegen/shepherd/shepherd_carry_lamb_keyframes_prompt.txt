@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: production game interaction keyframe sprite sheet
+Input image: the supplied four-direction shepherd sheet is the strict character master. Preserve exactly the same young woman, face, long black hair, large round black glasses, cream-white quilted jacket, pale trousers, light shoes, proportions, palette, outline, pixel density, and top-down three-quarter camera.
+Primary request: create four clear keyframes for the shepherd girl safely picking up one very small cream lamb.
+Action order from left to right: 1) front-right standing beside the lamb on the ground, 2) crouching and placing both hands beneath the lamb, 3) lifting the lamb toward her chest, 4) standing while securely holding the calm lamb against the front of her jacket.
+Style/medium: polished hand-authored pixel art identical to the supplied shepherd master; crisp intentional pixel clusters; dark charcoal-brown outline; restrained two-to-three-tone shading; cute pastoral game art.
+Composition/framing: exact single horizontal row of 4 isolated chronological full-body keyframes. One shepherd and one lamb per equal cell. Identical character identity, scale, palette, and ground anchor. Generous padding. No overlap between cells, no grid lines, and no labels.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background with no shadow, gradient, texture, floor, or lighting variation.
+Constraints: only one small cream lamb in each frame; safe natural grip; same outfit and hairstyle throughout; full bodies visible; no tools, text, logo, watermark, or #ff00ff in either subject.
+Avoid: adult oversized sheep, extra animals, unsafe grip, floating lamb, missing glasses, short hair, outfit drift, identity drift, duplicated limbs, scenery, cast shadows, anti-aliased illustration.

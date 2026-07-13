@@ -1,0 +1,7 @@
+Use case: identity-preserve
+Asset type: 6-frame shepherd dog attack sprite sheet for a 2D Godot pixel-art game
+Input image: Image 1 is the immutable shepherd dog identity reference. Preserve its exact warm sable and cream palette, blue collar, markings, anatomy, proportions, outline thickness, eye, camera angle, and pixel density.
+Primary request: Create exactly 6 right-facing attack frames in a strict 3-column by 2-row grid: guarded crouch, weight shifts back, forward leap, shoulder-and-muzzle strike, landing, return to guarded stance. The attack travels horizontally to the right and reads as driving a wolf away, without graphic injury.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor, shadow, texture, gradient, grid lines, impact text, or lighting variation.
+Composition: one complete dog per equal cell, stable bottom-center attack anchor, enough right-side padding for the leap, no overlap.
+Constraints: exactly 6 frames; preserve the blue collar in every frame; no wolf or other target, blood, wounds, extra animals, text, numbers, borders, scenery, or watermark; do not use #02f903 on the dog.

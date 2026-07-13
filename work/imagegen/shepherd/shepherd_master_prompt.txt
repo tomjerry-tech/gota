@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: production-ready game character turnaround sprite master for a Godot pastoral management game
+Input image: use the supplied pixel-art shepherd girl as the strict character identity, outfit, palette, and facial-design reference. Preserve the same young woman in every view.
+Primary request: redraw this exact shepherd girl as a clean four-direction character master compatible with the existing Tiny Swords game art.
+Subject: cute young East Asian woman with very long black hair, large round black glasses, warm gentle expression, cream-white quilted puffer jacket, pale off-white trousers, and light shoes with subtle pale aqua accents. Preserve the recognizable center-parted fringe, glasses, long hair silhouette, jacket quilting, and compact proportions.
+Style/medium: polished hand-authored pixel art closely compatible with Tiny Swords; cute compact chibi proportions; large readable head and small body; dark charcoal-brown outline; restrained two-to-three-tone shading; crisp intentional pixel clusters; slightly warm pastoral palette; no smooth vector edges, no painterly brushwork.
+Camera: top-down three-quarter game camera matching Tiny Swords units, not an eye-level portrait and not a side-scrolling camera.
+Composition/framing: exact 2x2 grid with four isolated full-body neutral standing views in this order: top-left front/down, top-right back/up, bottom-left left-facing, bottom-right right-facing. One character per equal cell. Identical scale, body proportions, palette, and foot anchor in all cells. Generous empty padding. No grid lines and no labels.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background, uniform across the entire image with no shadows, gradient, texture, floor plane, or lighting variation.
+Constraints: match the supplied character closely; full body visible in every cell; glasses remain readable; outfit and hairstyle never change; no props, no shepherd crook, no sheep, no text, no logo, no watermark; do not use #ff00ff anywhere in the character.
+Avoid: photorealism, anime illustration, 3D rendering, anti-aliased painterly edges, oversized sprites, differing outfits, differing identities, inconsistent hair length, duplicated limbs, floating accessories, cast shadows, decorative scenery, extra characters.

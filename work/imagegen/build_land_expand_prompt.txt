@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: small 2D build-menu card icon
+Primary request: Create one clear land-expansion icon for a floating pastoral island game: a square grassy island tile with dark rocky cliff sides, surrounded by four small golden arrows pointing outward to show expansion in every direction.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no shadow.
+Style/medium: crisp low-resolution hand-painted pixel art matching Tiny Swords terrain and UI icons; chunky readable silhouette, dark outline, limited green, stone-blue and gold palette, top-down three-quarter view.
+Composition/framing: one centered island tile and four outward arrows, full icon visible, generous padding, readable at 64x64 pixels.
+Constraints: no text, no watermark, no buildings, do not use #02f903 on the icon.
+Avoid: realistic rendering, smooth vector art, gradients, background texture, multiple islands.

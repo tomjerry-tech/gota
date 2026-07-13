@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: game character turnaround sprite concept
+Input image: the left portion is the identity and clothing reference photo; the right portion is a Tiny Swords pixel-art scale and rendering reference. Use the young woman on the right side of the photo as the subject. Use the sprite only for visual language, proportions, camera angle, outline, pixel density, and shading.
+Primary request: design the female playable shepherd character for the existing pastoral game as a consistent four-direction standing turnaround sheet.
+Subject: young East Asian woman with long softly wavy black hair, large round black glasses, gentle facial impression, light gray-blue buttoned top adapted into a practical pastoral blouse, dark navy practical trousers, and brown farm boots. Preserve her recognizable large round glasses, long dark hair silhouette, soft fringe, and light gray-blue upper clothing, simplified for pixel art.
+Style/medium: polished hand-authored pixel art closely compatible with Tiny Swords; cute compact proportions; large readable head; small body; dark navy-brown outline; restrained two-to-three-tone shading; crisp pixel clusters; no painterly rendering and no smooth vector edges.
+Composition/framing: exact 2x2 grid containing four isolated full-body neutral standing views of the same character: front/down, back/up, left, right. One character per equal cell, identical scale and foot anchor, generous empty padding, no overlap, no grid lines, no labels.
+Camera: top-down three-quarter game camera matching Tiny Swords, not eye-level portrait view.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background, uniform across the entire image with no shadow, gradient, texture, floor, or lighting variation.
+Constraints: keep identity, outfit, glasses, body proportions, palette, hair length, and pixel technique identical across all four views; full body visible in every cell; no props, no weapon, no text, no logo, no watermark; do not use #ff00ff anywhere in the character.
+Avoid: photorealism, anime illustration, 3D render, anti-aliased painterly edges, different outfits, duplicated limbs, floating accessories, cast shadows, decorative background, extra characters.

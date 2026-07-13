@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: production game interaction animation sprite sheet
+Input image: the supplied shepherd turnaround is the strict character master. Preserve exactly the same young woman, outfit, palette, proportions, pixel density, camera, outline, and hair silhouette in every frame.
+Primary request: create a six-frame sheep-calling whistle animation for the shepherd girl.
+Action: front-right three-quarter standing pose, raise two fingers toward the mouth, inhale, whistle, hold briefly, lower the hand. Gentle confident expression. The feet stay fixed and the sequence can return to idle cleanly.
+Style/medium: polished hand-authored pixel art closely compatible with Tiny Swords; crisp pixel clusters; dark charcoal-brown outline; restrained two-to-three-tone shading.
+Composition/framing: exact single horizontal row of 6 isolated chronological full-body frames from left to right. Equal cells; identical scale and foot anchor; generous padding; no overlap, grid lines, labels, sound waves, or effects.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background with no shadow, gradient, texture, or floor.
+Constraints: same identity, glasses, long black hair, cream-white quilted jacket, pale trousers, and light shoes throughout; no whistle object, shepherd crook, sheep, text, logo, watermark, or #ff00ff in the character.
+Avoid: shouting, aggressive expression, outfit drift, identity drift, duplicated fingers or limbs, scenery, cast shadows, anti-aliased illustration.

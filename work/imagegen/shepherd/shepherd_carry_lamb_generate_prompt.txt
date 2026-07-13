@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: production game interaction animation sprite sheet
+Primary request: create a six-frame lift-and-hold-lamb animation for the established shepherd girl character from a pastoral management game.
+Subject: the same cute young East Asian shepherd woman with very long black hair, center-parted fringe, large round black glasses, gentle expression, cream-white quilted puffer jacket, pale off-white trousers, and light shoes with subtle pale aqua accents. Cute compact chibi proportions with a large readable head and small body.
+Action: front-right three-quarter pose, crouch toward one very small cream lamb, place both hands safely beneath it, lift smoothly, and finish standing while holding the calm lamb securely against the front of her cream jacket. Clear chronological progression.
+Style/medium: polished hand-authored pixel art matching the supplied game's existing shepherd sprite language and broadly compatible with Tiny Swords; crisp intentional pixel clusters; dark charcoal-brown outline; restrained two-to-three-tone shading; no smooth vector edges or painterly rendering.
+Camera: top-down three-quarter game camera, not eye-level portrait and not side-scrolling.
+Composition/framing: exact single horizontal row of 6 isolated chronological full-body frames from left to right. Equal cells; identical character identity, scale, palette, and ground anchor; generous padding; no overlap, grid lines, or labels.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background with no shadow, gradient, texture, or floor.
+Constraints: identical shepherd appearance in every frame; only one small cream lamb; lamb style and scale match a cute pastoral pixel game; no tools, text, logo, watermark, or #ff00ff in either subject.
+Avoid: adult oversized sheep, unsafe grip, extra animals, outfit drift, identity drift, short hair, missing glasses, duplicated limbs, scenery, cast shadows, anti-aliased illustration.

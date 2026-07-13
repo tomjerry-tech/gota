@@ -1,0 +1,28 @@
+# Godot editor cache
+.godot/
+
+# Local Codex/project metadata
+.agents/
+
+# Duplicate source asset pack; production assets live under assets/tiny_swords/
+Tiny Swords (Free Pack)/
+
+# Generated image/audio workflow outputs. Keep prompts, scripts, and capture code.
+work/**/*.png
+work/**/*.jpg
+work/**/*.jpeg
+work/**/*.webp
+work/**/*.log
+work/**/*.import
+work/**/*.pyc
+work/**/__pycache__/
+work/configure-gpt-image-2.ps1
+
+# Python cache
+**/__pycache__/
+*.py[cod]
+
+# Local temporary files
+*.tmp
+*.bak
+*.swp

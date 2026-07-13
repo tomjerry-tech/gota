@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: 2D game sprite sheet
+Primary request: Create a pixel-art sprite sheet of a mature tuft of grass being eaten, with 6 separate frames in one horizontal row. The tuft should gradually shorten from full height to a tiny stem while keeping the same centered footprint and consistent colors.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no shadows or texture.
+Style/medium: crisp hand-painted pixel art matching a Tiny Swords-inspired top-down game.
+Composition/framing: 6 cells, each 256x256, generous padding, no overlap.
+Constraints: exactly six frames left to right, no labels, no text, no watermark, do not use the green key color on the plants.
+Avoid: soil, rocks, flowers, scenery, grid lines, shadows, gradients.

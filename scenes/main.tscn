@@ -1,0 +1,706 @@
+[gd_scene format=3 uid="uid://cp2177c5hc8nt"]
+
+[ext_resource type="Texture2D" uid="uid://dpcwaxp17psip" path="res://assets/tiny_swords/terrain/tilemap_color1.png" id="1_tilemap"]
+[ext_resource type="Texture2D" uid="uid://eylmiynqhxno" path="res://assets/tiny_swords/decorations/cloud_01.png" id="2_cloud"]
+[ext_resource type="Texture2D" uid="uid://cwl2m4e70p4dv" path="res://assets/tiny_swords/decorations/tree_01.png" id="3_tree"]
+[ext_resource type="Texture2D" uid="uid://bodxmmglv82sg" path="res://assets/tiny_swords/decorations/bush_01.png" id="4_bush"]
+[ext_resource type="Texture2D" uid="uid://c4rl5wxw2m06u" path="res://assets/tiny_swords/decorations/rock_01.png" id="5_rock1"]
+[ext_resource type="Texture2D" uid="uid://ymh8sq08agex" path="res://assets/tiny_swords/decorations/rock_02.png" id="6_rock2"]
+[ext_resource type="Texture2D" uid="uid://dscoak4uvpey5" path="res://assets/tiny_swords/sheep/sheep_move.png" id="7_sheep"]
+[ext_resource type="Script" uid="uid://oibqa1hyy5m" path="res://scripts/main.gd" id="8_main"]
+[ext_resource type="Texture2D" uid="uid://bpf6dwyrkv6on" path="res://assets/tiny_swords/decorations/grass_sway.png" id="9_grass_sway"]
+[ext_resource type="Script" uid="uid://b7aob3xpdgwcr" path="res://scripts/swaying_grass.gd" id="10_grass_script"]
+[ext_resource type="Script" uid="uid://c7gcp4sjptsb5" path="res://scripts/sheep_ai.gd" id="11_sheep_ai"]
+[ext_resource type="Texture2D" uid="uid://bmpk5fgss3x7y" path="res://assets/tiny_swords/ui/hud_ribbon_blue.png" id="12_hud_ribbon"]
+[ext_resource type="Texture2D" uid="uid://1pggoau5pltb" path="res://assets/tiny_swords/ui/coin.png" id="13_coin"]
+[ext_resource type="Texture2D" uid="uid://b87n43reh3h66" path="res://assets/tiny_swords/ui/sheep_count.png" id="14_sheep_count"]
+[ext_resource type="Script" uid="uid://cfdfucntmjj2g" path="res://scripts/top_hud.gd" id="15_top_hud"]
+[ext_resource type="Script" uid="uid://dypcnwj8mi4u4" path="res://scripts/day_cycle_display.gd" id="16_day_cycle"]
+[ext_resource type="Texture2D" path="res://assets/tiny_swords/ui/bottom_toolbar/toolbar_paper.png" id="17_toolbar_paper"]
+[ext_resource type="Texture2D" path="res://assets/tiny_swords/ui/bottom_toolbar/build.png" id="18_build_icon"]
+[ext_resource type="Texture2D" path="res://assets/tiny_swords/ui/bottom_toolbar/sheep.png" id="19_toolbar_sheep"]
+[ext_resource type="Texture2D" path="res://assets/tiny_swords/ui/bottom_toolbar/medical.png" id="20_medical_icon"]
+[ext_resource type="Script" path="res://scripts/bottom_toolbar.gd" id="21_bottom_toolbar"]
+[ext_resource type="Script" path="res://scripts/build_menu.gd" id="22_build_menu"]
+[ext_resource type="Script" path="res://scripts/build_controller.gd" id="23_build_controller"]
+[ext_resource type="Script" path="res://scripts/world_camera.gd" id="24_world_camera"]
+[ext_resource type="Script" path="res://scripts/infinite_clouds.gd" id="25_infinite_clouds"]
+[ext_resource type="Script" path="res://scripts/sheep_menu.gd" id="26_sheep_menu"]
+[ext_resource type="Script" path="res://scripts/sheep_detail_menu.gd" id="27_sheep_detail_menu"]
+[ext_resource type="Script" path="res://scripts/time_controls.gd" id="28_time_controls"]
+[ext_resource type="Script" path="res://scripts/newbie_commission.gd" id="29_newbie_commission"]
+[ext_resource type="Script" path="res://scripts/daily_report.gd" id="30_daily_report"]
+[ext_resource type="Script" path="res://scripts/medical_menu.gd" id="31_medical_menu"]
+[ext_resource type="Script" path="res://scripts/daily_task_manager.gd" id="32_daily_task_manager"]
+[ext_resource type="Script" path="res://scripts/right_side_panel.gd" id="33_right_side_panel"]
+[ext_resource type="Script" path="res://scripts/daily_task_panel.gd" id="34_daily_task_panel"]
+[ext_resource type="Script" path="res://scripts/story_event_manager.gd" id="35_story_event_manager"]
+[ext_resource type="Script" path="res://scripts/system_menu.gd" id="36_system_menu"]
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="37_player_controller"]
+[ext_resource type="Script" path="res://scripts/roundup_manager.gd" id="38_roundup_manager"]
+[ext_resource type="Script" path="res://scripts/dog_controller.gd" id="39_dog_controller"]
+[ext_resource type="Script" path="res://scripts/dog_command_bar.gd" id="40_dog_command_bar"]
+[ext_resource type="Script" path="res://scripts/market_order_manager.gd" id="41_market_order_manager"]
+[ext_resource type="Script" path="res://scripts/dog_manager.gd" id="42_dog_manager"]
+[ext_resource type="Script" path="res://scripts/context_info_panel.gd" id="43_context_info_panel"]
+[ext_resource type="Script" path="res://scripts/day_routine_manager.gd" id="44_day_routine_manager"]
+[ext_resource type="Script" path="res://scripts/daily_guide_panel.gd" id="45_daily_guide_panel"]
+[ext_resource type="Script" path="res://scripts/building_interaction_panel.gd" id="46_building_interaction_panel"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cliff"]
+atlas = ExtResource("1_tilemap")
+region = Rect2(320, 192, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grass"]
+atlas = ExtResource("1_tilemap")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tree"]
+atlas = ExtResource("3_tree")
+region = Rect2(0, 0, 192, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bush"]
+atlas = ExtResource("4_bush")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grass_sway_0"]
+atlas = ExtResource("9_grass_sway")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grass_sway_1"]
+atlas = ExtResource("9_grass_sway")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grass_sway_2"]
+atlas = ExtResource("9_grass_sway")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grass_sway_3"]
+atlas = ExtResource("9_grass_sway")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grass_sway_4"]
+atlas = ExtResource("9_grass_sway")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grass_sway_5"]
+atlas = ExtResource("9_grass_sway")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grass_sway_6"]
+atlas = ExtResource("9_grass_sway")
+region = Rect2(768, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_grass_sway_7"]
+atlas = ExtResource("9_grass_sway")
+region = Rect2(896, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_grass_sway"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_grass_sway_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_grass_sway_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_grass_sway_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_grass_sway_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_grass_sway_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_grass_sway_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_grass_sway_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_grass_sway_7")
+}],
+"loop": 0,
+"name": &"sway",
+"speed": 8.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sheep_0"]
+atlas = ExtResource("7_sheep")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sheep_1"]
+atlas = ExtResource("7_sheep")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sheep_2"]
+atlas = ExtResource("7_sheep")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sheep_3"]
+atlas = ExtResource("7_sheep")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sheep"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sheep_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sheep_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sheep_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sheep_3")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 4.0
+}]
+
+[node name="Main" type="Node2D" unique_id=1371360314]
+texture_filter = 1
+script = ExtResource("8_main")
+
+[node name="WorldCamera" type="Camera2D" parent="."]
+position = Vector2(640, 360)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+script = ExtResource("24_world_camera")
+
+[node name="Water" type="ColorRect" parent="." unique_id=725068121]
+offset_left = -22.0
+offset_top = -7.0
+offset_right = 1258.0
+offset_bottom = 713.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
+
+[node name="CloudRight" type="Sprite2D" parent="Water" unique_id=1677379670]
+visible = false
+position = Vector2(1164, 522)
+scale = Vector2(-0.66, 0.66)
+texture = ExtResource("2_cloud")
+
+[node name="CloudRight" type="Sprite2D" parent="Water/CloudRight" unique_id=1079096152]
+position = Vector2(1457.5754, -72.727234)
+scale = Vector2(-0.66, 0.66)
+texture = ExtResource("2_cloud")
+
+[node name="CloudLeft" type="Sprite2D" parent="." unique_id=583231414]
+visible = false
+position = Vector2(145, 188)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("2_cloud")
+
+[node name="CloudRight" type="Sprite2D" parent="." unique_id=2080888874]
+visible = false
+position = Vector2(1077.0001, 425.37988)
+scale = Vector2(-0.66, 0.51640725)
+texture = ExtResource("2_cloud")
+
+[node name="InfiniteClouds" type="Node2D" parent="."]
+script = ExtResource("25_infinite_clouds")
+
+[node name="CloudRight" type="Sprite2D" parent="CloudRight" unique_id=277259901]
+position = Vector2(331.81815, -603.0303)
+scale = Vector2(-0.66, 0.66)
+texture = ExtResource("2_cloud")
+
+[node name="Island" type="Node2D" parent="." unique_id=1931521102]
+
+[node name="Cliff" type="Sprite2D" parent="Island" unique_id=468893186]
+z_index = 1
+position = Vector2(640, 585)
+scale = Vector2(2, 1)
+texture = SubResource("AtlasTexture_cliff")
+
+[node name="Grass" type="Sprite2D" parent="Island" unique_id=718852169]
+z_index = 2
+position = Vector2(640, 350)
+scale = Vector2(2, 2)
+texture = SubResource("AtlasTexture_grass")
+
+[node name="Decorations" type="Node2D" parent="Island" unique_id=1294745055]
+z_index = 4
+
+[node name="Tree" type="Sprite2D" parent="Island/Decorations" unique_id=1274047418]
+position = Vector2(536, 348)
+texture = SubResource("AtlasTexture_tree")
+
+[node name="Bush" type="Sprite2D" parent="Island/Decorations" unique_id=2072022454]
+position = Vector2(728, 235)
+texture = SubResource("AtlasTexture_bush")
+
+[node name="SwayingGrass" type="AnimatedSprite2D" parent="Island/Decorations" unique_id=1208978796]
+position = Vector2(610, 210)
+sprite_frames = SubResource("SpriteFrames_grass_sway")
+animation = &"sway"
+script = ExtResource("10_grass_script")
+
+[node name="Rock1" type="Sprite2D" parent="Island/Decorations" unique_id=728939349]
+position = Vector2(732, 396)
+texture = ExtResource("5_rock1")
+
+[node name="Rock2" type="Sprite2D" parent="Island/Decorations" unique_id=1791848578]
+position = Vector2(584, 472)
+texture = ExtResource("6_rock2")
+
+[node name="Buildings" type="Node2D" parent="Island"]
+
+[node name="Shepherd" type="AnimatedSprite2D" parent="Island"]
+z_index = 6
+position = Vector2(640, 500)
+script = ExtResource("37_player_controller")
+
+[node name="ShepherdDog" type="AnimatedSprite2D" parent="Island"]
+visible = false
+z_index = 6
+position = Vector2(690, 500)
+script = ExtResource("39_dog_controller")
+
+[node name="Sheep" type="Node2D" parent="Island" unique_id=5081900]
+z_index = 5
+
+[node name="Sheep1" type="AnimatedSprite2D" parent="Island/Sheep" unique_id=1292023993]
+position = Vector2(680, 288)
+sprite_frames = SubResource("SpriteFrames_sheep")
+animation = &"walk"
+autoplay = "walk"
+script = ExtResource("11_sheep_ai")
+
+[node name="Sheep2" type="AnimatedSprite2D" parent="Island/Sheep" unique_id=198939]
+position = Vector2(766, 318)
+sprite_frames = SubResource("SpriteFrames_sheep")
+animation = &"walk"
+autoplay = "walk"
+frame = 1
+frame_progress = 0.35
+script = ExtResource("11_sheep_ai")
+
+[node name="Sheep3" type="AnimatedSprite2D" parent="Island/Sheep" unique_id=552720600]
+position = Vector2(647, 406)
+sprite_frames = SubResource("SpriteFrames_sheep")
+animation = &"walk"
+autoplay = "walk"
+frame = 2
+frame_progress = 0.7
+script = ExtResource("11_sheep_ai")
+
+[node name="Sheep4" type="AnimatedSprite2D" parent="Island/Sheep" unique_id=973289262]
+position = Vector2(758, 354)
+sprite_frames = SubResource("SpriteFrames_sheep")
+animation = &"walk"
+autoplay = "walk"
+frame = 3
+frame_progress = 0.2
+script = ExtResource("11_sheep_ai")
+
+[node name="Sheep5" type="AnimatedSprite2D" parent="Island/Sheep" unique_id=1221539275]
+position = Vector2(510, 250)
+sprite_frames = SubResource("SpriteFrames_sheep")
+animation = &"walk"
+autoplay = "walk"
+frame = 1
+frame_progress = 0.8
+script = ExtResource("11_sheep_ai")
+
+[node name="Sheep6" type="AnimatedSprite2D" parent="Island/Sheep" unique_id=1478474017]
+position = Vector2(490, 438)
+sprite_frames = SubResource("SpriteFrames_sheep")
+animation = &"walk"
+autoplay = "walk"
+frame = 2
+frame_progress = 0.4
+script = ExtResource("11_sheep_ai")
+
+[node name="BuildController" type="Node2D" parent="."]
+script = ExtResource("23_build_controller")
+
+[node name="DogManager" type="Node" parent="."]
+script = ExtResource("42_dog_manager")
+
+[node name="DayRoutineManager" type="Node" parent="."]
+script = ExtResource("44_day_routine_manager")
+
+[node name="DailyTaskManager" type="Node" parent="."]
+script = ExtResource("32_daily_task_manager")
+
+[node name="MarketOrderManager" type="Node" parent="."]
+script = ExtResource("41_market_order_manager")
+
+[node name="StoryEventManager" type="Node" parent="."]
+script = ExtResource("35_story_event_manager")
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=888979393]
+layer = 10
+
+[node name="TopHUD" type="Control" parent="HUD" unique_id=377184825]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 18.0
+offset_top = 12.0
+offset_right = 578.0
+offset_bottom = 115.0
+scale = Vector2(0.5, 0.5)
+mouse_filter = 2
+script = ExtResource("15_top_hud")
+
+[node name="Ribbon" type="TextureRect" parent="HUD/TopHUD" unique_id=1547740559]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("12_hud_ribbon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CoinIcon" type="TextureRect" parent="HUD/TopHUD/Ribbon" unique_id=591800087]
+layout_mode = 0
+offset_left = 55.0
+offset_top = 38.0
+offset_right = 127.0
+offset_bottom = 66.0
+mouse_filter = 2
+texture = ExtResource("13_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MoneyLabel" type="Label" parent="HUD/TopHUD/Ribbon" unique_id=1906096921]
+layout_mode = 0
+offset_left = 109.0
+offset_top = 34.0
+offset_right = 171.0
+offset_bottom = 68.0
+theme_override_colors/font_color = Color(1, 0.94, 0.69, 1)
+theme_override_colors/font_shadow_color = Color(0.08, 0.12, 0.18, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+text = "20000"
+vertical_alignment = 1
+
+[node name="SheepIcon" type="TextureRect" parent="HUD/TopHUD/Ribbon" unique_id=811496425]
+layout_mode = 0
+offset_left = 179.0
+offset_top = 34.0
+offset_right = 215.0
+offset_bottom = 66.0
+mouse_filter = 2
+texture = ExtResource("14_sheep_count")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SheepLabel" type="Label" parent="HUD/TopHUD/Ribbon" unique_id=131201762]
+layout_mode = 0
+offset_left = 218.0
+offset_top = 33.0
+offset_right = 270.0
+offset_bottom = 68.0
+theme_override_colors/font_color = Color(1, 0.94, 0.69, 1)
+theme_override_colors/font_shadow_color = Color(0.08, 0.12, 0.18, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+text = "6"
+vertical_alignment = 1
+
+[node name="DayLabel" type="Label" parent="HUD/TopHUD/Ribbon" unique_id=1341684426]
+layout_mode = 0
+offset_left = 293.0
+offset_top = 36.0
+offset_right = 352.0
+offset_bottom = 68.0
+theme_override_colors/font_color = Color(1, 0.94, 0.69, 1)
+theme_override_colors/font_shadow_color = Color(0.08, 0.12, 0.18, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 23
+text = "第1天"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DayCycle" type="Control" parent="HUD/TopHUD/Ribbon" unique_id=760014220]
+anchors_preset = 0
+offset_left = 389.0
+offset_top = 34.0
+offset_right = 483.0
+offset_bottom = 72.0
+mouse_filter = 2
+script = ExtResource("16_day_cycle")
+
+[node name="TimeControls" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -490.0
+offset_top = 18.0
+offset_right = -18.0
+offset_bottom = 114.0
+grow_horizontal = 0
+pivot_offset = Vector2(472, 0)
+scale = Vector2(0.5, 0.5)
+mouse_filter = 1
+script = ExtResource("28_time_controls")
+
+[node name="NewbieCommission" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -430.0
+offset_top = 120.0
+offset_right = -18.0
+offset_bottom = 278.0
+grow_horizontal = 0
+pivot_offset = Vector2(412, 0)
+scale = Vector2(0.5, 0.5)
+mouse_filter = 1
+script = ExtResource("29_newbie_commission")
+
+[node name="DailyGuidePanel" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -746.0
+offset_top = 78.0
+offset_right = -426.0
+offset_bottom = 158.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("45_daily_guide_panel")
+
+[node name="RoundupStatus" type="Control" parent="HUD"]
+visible = false
+layout_mode = 3
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 14.0
+offset_right = 220.0
+offset_bottom = 88.0
+grow_horizontal = 2
+pivot_offset = Vector2(220, 0)
+scale = Vector2(0.5, 0.5)
+mouse_filter = 2
+script = ExtResource("38_roundup_manager")
+
+[node name="DogCommandBar" type="Control" parent="HUD"]
+visible = false
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -240.0
+offset_right = 300.0
+offset_bottom = -140.0
+grow_horizontal = 2
+grow_vertical = 0
+pivot_offset = Vector2(300, 50)
+scale = Vector2(0.5, 0.5)
+mouse_filter = 1
+script = ExtResource("40_dog_command_bar")
+
+[node name="ContextInfoPanel" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -390.0
+offset_top = -160.0
+offset_right = 390.0
+offset_bottom = -96.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 1
+script = ExtResource("43_context_info_panel")
+
+[node name="BottomToolbar" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -112.0
+offset_right = 220.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+pivot_offset = Vector2(220, 50)
+scale = Vector2(0.5, 0.5)
+mouse_filter = 1
+script = ExtResource("21_bottom_toolbar")
+
+[node name="Paper" type="TextureRect" parent="HUD/BottomToolbar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+texture = ExtResource("17_toolbar_paper")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BuildButton" type="TextureButton" parent="HUD/BottomToolbar/Paper"]
+layout_mode = 0
+offset_left = 85.0
+offset_top = 20.0
+offset_right = 149.0
+offset_bottom = 84.0
+tooltip_text = "建造"
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("18_build_icon")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="SheepButton" type="TextureButton" parent="HUD/BottomToolbar/Paper"]
+layout_mode = 0
+offset_left = 188.0
+offset_top = 20.0
+offset_right = 252.0
+offset_bottom = 84.0
+tooltip_text = "羊群"
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("19_toolbar_sheep")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="MedicalButton" type="TextureButton" parent="HUD/BottomToolbar/Paper"]
+layout_mode = 0
+offset_left = 291.0
+offset_top = 20.0
+offset_right = 355.0
+offset_bottom = 84.0
+tooltip_text = "医疗"
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("20_medical_icon")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="BuildMenu" type="Control" parent="HUD"]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 196.0
+offset_right = 624.0
+offset_bottom = 596.0
+scale = Vector2(0.5, 0.5)
+mouse_filter = 1
+script = ExtResource("22_build_menu")
+
+[node name="SheepMenu" type="Control" parent="HUD"]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 196.0
+offset_right = 624.0
+offset_bottom = 896.0
+scale = Vector2(0.5, 0.5)
+mouse_filter = 1
+script = ExtResource("26_sheep_menu")
+
+[node name="SheepDetailMenu" type="Control" parent="HUD"]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 196.0
+offset_right = 624.0
+offset_bottom = 596.0
+scale = Vector2(0.5, 0.5)
+mouse_filter = 1
+script = ExtResource("27_sheep_detail_menu")
+
+[node name="MedicalMenu" type="Control" parent="HUD"]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 196.0
+offset_right = 624.0
+offset_bottom = 626.0
+scale = Vector2(0.5, 0.5)
+mouse_filter = 1
+script = ExtResource("31_medical_menu")
+
+[node name="BuildingInteractionPanel" type="Control" parent="HUD"]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 232.0
+offset_right = 364.0
+offset_bottom = 472.0
+mouse_filter = 1
+script = ExtResource("46_building_interaction_panel")
+
+[node name="RightSidePanel" type="Control" parent="HUD"]
+visible = false
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -358.0
+offset_top = 128.0
+offset_right = -18.0
+offset_bottom = 598.0
+grow_horizontal = 0
+mouse_filter = 1
+script = ExtResource("33_right_side_panel")
+
+[node name="DailyTaskPanel" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 72.0
+offset_right = -18.0
+offset_bottom = 112.0
+grow_horizontal = 0
+mouse_filter = 1
+script = ExtResource("34_daily_task_panel")
+
+[node name="DailyReport" type="Control" parent="HUD"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("30_daily_report")
+
+[node name="SystemMenu" type="Control" parent="HUD"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("36_system_menu")

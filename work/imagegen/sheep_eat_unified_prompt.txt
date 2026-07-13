@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: 2D game sprite sheet for a Godot pixel-art game
+Primary request: Create exactly 12 separate eating animation frames of one cute white sheep in a 6 columns by 2 rows grid. The sheep faces right and repeats a clear eat-grass cycle: head lowers toward the ground, chews, then lifts slightly. Keep the exact same character design, proportions, facing direction, and centered footprint in every frame.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background with no shadows or texture.
+Subject: the same sheep style as a polished hand-painted pixel-art game: fluffy off-white wool with small cream highlights, dark charcoal face, ears, legs and tail, warm dark outline, friendly readable silhouette.
+Style/medium: crisp detailed pixel art, coherent with a generated lying/resting sheep sprite, not the tiny low-detail Tiny Swords sheep.
+Composition/framing: 6 equal columns and 2 equal rows, each cell 256x256, generous padding, no overlap.
+Constraints: exactly twelve frames, no labels, no text, no watermark, no scenery, do not use the green key color on the sheep.
+Avoid: extra sheep, grass clumps, props, grid lines, shadows, gradients, inconsistent proportions, cropped body.

@@ -1,0 +1,7 @@
+Use case: identity-preserve
+Asset type: 6-frame side-running shepherd dog sprite sheet for a 2D Godot pixel-art game
+Input image: Image 1 is the immutable shepherd dog identity reference. Preserve its exact warm sable and cream palette, blue collar, markings, anatomy, proportions, outline thickness, eye, camera angle, and pixel density.
+Primary request: Create exactly 6 right-facing fast-run frames in a strict 3-column by 2-row grid, ordered left-to-right across the top row and then the bottom row. Show an athletic cyclic gallop with alternating extension and compression, focused head posture, and natural tail follow-through. Frame 6 must transition cleanly to frame 1.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor, shadow, texture, gradient, grid lines, speed lines, or lighting variation.
+Composition: one complete dog per equal cell, identical scale and body volume, stable bottom-center foot anchor, generous padding, no overlap.
+Constraints: exactly 6 frames; preserve the blue collar in every frame; do not redesign the dog; no extra animals, text, numbers, borders, scenery, blood, wounds, or watermark; do not use #02f903 on the dog.

@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: 2D game sprite sheet for Godot AnimatedSprite2D
+Primary request: Create an eight-frame running animation cycle for one cute sheep.
+Subject: The exact same small sheep in every frame, fluffy white wool, dark charcoal face and legs, compact rounded body, facing right in a three-quarter top-down view.
+Style: crisp hand-drawn pixel art compatible with the Tiny Swords game asset scale, dark navy pixel outline, limited green-blue shadow palette, no anti-aliasing, no blur.
+Layout: exactly 8 frames arranged left-to-right in a strict 4-column by 2-row grid. Every cell is the same square size. Keep the sheep centered at the same bottom-center anchor in every cell. Leave clear separation between cells. Do not add grid lines.
+Animation: a readable fast run cycle with alternating legs, slightly bouncing wool, consistent body volume, and a seamless transition from frame 8 back to frame 1.
+Background: perfectly flat solid #00ff00 chroma-key background across the entire image, with no texture, gradient, lighting variation, floor, or shadows. Do not use #00ff00 on the sheep.
+Constraints: one sheep per cell; identical identity, proportions, colors, outline thickness, camera angle, and scale in all frames; no overlapping cells; no text; no numbers; no labels; no border; no watermark; no extra objects.

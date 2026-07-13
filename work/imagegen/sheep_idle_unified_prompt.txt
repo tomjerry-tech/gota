@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: 2D game sprite sheet for a Godot pixel-art game
+Primary request: Create exactly 6 separate idle animation frames of one cute white sheep in a single horizontal row. The sheep should gently shift its weight and blink across the frames while staying in place. Keep the exact same character design, proportions, facing right, and centered footprint in every frame.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background with no shadows or texture.
+Subject: the same sheep style as a polished hand-painted pixel-art game: fluffy off-white wool with small cream highlights, dark charcoal face, ears, legs and tail, warm dark outline, friendly readable silhouette.
+Style/medium: crisp detailed pixel art, coherent with a generated lying/resting sheep sprite, not the tiny low-detail Tiny Swords sheep.
+Composition/framing: one horizontal row of 6 equal cells, each cell 256x256, generous padding, no overlap.
+Constraints: exactly six frames, no labels, no text, no watermark, no scenery, do not use the green key color on the sheep.
+Avoid: extra sheep, grass, props, grid lines, shadows, gradients, inconsistent proportions, cropped body.

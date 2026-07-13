@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: small 2D build-menu card icon
+Primary request: Create one short wooden pasture fence segment for a sheep farming game. Show three warm-brown vertical posts connected by two horizontal rails, with slightly uneven hand-built timber and metal nail details.
+Scene/backdrop: perfectly flat solid #02f903 chroma-key background, no floor, no shadow.
+Style/medium: crisp low-resolution hand-painted pixel art matching Tiny Swords buildings and UI icons; chunky readable silhouette, dark navy-brown outline, limited palette, top-down three-quarter view.
+Composition/framing: one centered fence segment, full object visible, generous padding, readable at 64x64 pixels.
+Constraints: no text, no watermark, no scenery, no animals, do not use #02f903 on the fence.
+Avoid: realistic rendering, smooth vector art, gradients, background texture, multiple disconnected fences.

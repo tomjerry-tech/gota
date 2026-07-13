@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: production game animation sprite sheet
+Input image: the supplied shepherd turnaround is the strict character master. Preserve exactly the same young woman, outfit, palette, proportions, pixel density, camera, outline, and hair silhouette in every frame.
+Primary request: create a subtle front/down-facing idle animation for the shepherd girl.
+Action: gentle breathing, a tiny natural hair sway, and one soft blink. The first and final poses must loop seamlessly. No walking and no change of foot anchor.
+Style/medium: polished hand-authored pixel art closely compatible with Tiny Swords; crisp pixel clusters; dark charcoal-brown outline; restrained two-to-three-tone shading; no painterly or smooth vector rendering.
+Composition/framing: exact single horizontal row of 6 isolated full-body chronological frames from left to right. Every cell equal size; identical character scale; feet fixed to one anchor; generous padding; no overlaps, grid lines, or labels.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background with no shadow, gradient, texture, or floor.
+Constraints: same identity and cream-white quilted jacket in all 6 frames; long black hair and large round black glasses remain readable; no props, sheep, text, logo, watermark, or #ff00ff in the character.
+Avoid: camera changes, outfit drift, identity drift, duplicated limbs, sliding feet, mismatched frame sizes, decorative scenery, cast shadows, anti-aliased illustration.

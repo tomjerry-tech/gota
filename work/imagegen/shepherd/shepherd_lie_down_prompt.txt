@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: production game transition animation sprite sheet
+Input image: the supplied shepherd turnaround is the strict character master. Preserve exactly the same young woman, outfit, palette, proportions, pixel density, camera, outline, and hair silhouette in every frame.
+Primary request: create a six-frame transition of the shepherd girl lying down to rest on the grass, without drawing the grass or environment.
+Action: right-facing standing pose, bend knees, carefully lower to a seated pose, turn slightly, settle onto her side, finish in a comfortable curled resting pose with glasses still on. Clear chronological progression; no teleporting between poses.
+Style/medium: polished hand-authored pixel art closely compatible with Tiny Swords; crisp pixel clusters; dark charcoal-brown outline; restrained two-to-three-tone shading.
+Composition/framing: exact single horizontal row of 6 isolated full-body chronological frames from left to right. Equal cells; identical character scale; consistent ground baseline; enough padding for the horizontal lying pose; no overlaps, grid lines, or labels.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background with no shadow, gradient, texture, or floor.
+Constraints: same identity, long black hair, large round glasses, cream-white quilted jacket, pale trousers, and light shoes throughout; no blanket, pillow, props, sheep, text, logo, watermark, or #ff00ff in the character.
+Avoid: sleeping bag, bed, undressing, outfit drift, identity drift, duplicated limbs, disconnected poses, scenery, cast shadows, anti-aliased illustration.

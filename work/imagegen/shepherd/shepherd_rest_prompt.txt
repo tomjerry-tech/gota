@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: production game loop animation sprite sheet
+Input image: the supplied shepherd turnaround is the strict character master. Preserve exactly the same young woman, outfit, palette, proportions, pixel density, camera, outline, and hair silhouette in every frame.
+Primary request: create a calm six-frame lying rest and sleep loop for the shepherd girl.
+Action: right-facing curled side-lying pose, eyes gently close behind the glasses, slow breathing moves the jacket slightly, long hair settles and shifts subtly. First and final frames must loop seamlessly. Keep one stable body anchor.
+Style/medium: polished hand-authored pixel art closely compatible with Tiny Swords; crisp pixel clusters; dark charcoal-brown outline; restrained two-to-three-tone shading.
+Composition/framing: exact single horizontal row of 6 isolated chronological frames from left to right. Equal cells; identical scale and baseline; generous horizontal padding; no overlaps, grid lines, labels, sleep symbols, or effects.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background with no shadow, gradient, texture, or floor.
+Constraints: same identity, glasses, long black hair, cream-white quilted jacket, pale trousers, and light shoes throughout; no blanket, pillow, props, sheep, text, logo, watermark, or #ff00ff in the character.
+Avoid: standing poses, major body translation, outfit drift, identity drift, duplicated limbs, scenery, cast shadows, anti-aliased illustration.
