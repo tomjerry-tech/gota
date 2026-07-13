@@ -159,7 +159,7 @@ func send_to_rest(world_position: Vector2) -> bool:
 	return true
 
 
-func wake_up() -> void:
+func wake_up(natural_recovery := DAWN_RECOVERY) -> void:
 	if not active:
 		return
 	var slept_inside := resting
@@ -169,7 +169,7 @@ func wake_up() -> void:
 	going_to_rest = false
 	visible = true
 	command_mode = CommandMode.FOLLOW
-	recover_stamina(MAX_STAMINA if slept_inside else DAWN_RECOVERY)
+	recover_stamina(MAX_STAMINA if slept_inside else float(natural_recovery))
 	_play_idle()
 
 

@@ -53,6 +53,7 @@ const SHEEP_NAME_POOL := [
 @onready var dog_controller: AnimatedSprite2D = $Island/ShepherdDog
 @onready var dog_manager: Node = $DogManager
 @onready var day_routine_manager: Node = $DayRoutineManager
+@onready var lost_sheep_manager: Node = $LostSheepManager
 @onready var roundup_manager: Control = $HUD/RoundupStatus
 @onready var dog_command_bar: Control = $HUD/DogCommandBar
 @onready var save_manager: Node = get_node("/root/SaveManager")
@@ -160,6 +161,7 @@ func get_save_data() -> Dictionary:
 		"dogs": dog_manager.get_save_data(),
 		"roundup": roundup_manager.get_save_data(),
 		"day_routine": day_routine_manager.get_save_data(),
+		"lost_sheep": lost_sheep_manager.get_save_data(),
 		"audio": audio_manager.get_save_data(),
 		"camera": {
 			"position": [world_camera.position.x, world_camera.position.y],
@@ -186,6 +188,7 @@ func restore_save_data(data: Dictionary) -> bool:
 	dog_manager.restore_save_data(data.get("dogs", data.get("dog", {})))
 	roundup_manager.restore_save_data(data.get("roundup", {}))
 	day_routine_manager.restore_save_data(data.get("day_routine", {}))
+	lost_sheep_manager.restore_save_data(data.get("lost_sheep", {}))
 	audio_manager.restore_save_data(data.get("audio", {}))
 	story_event_manager.restore_save_data(data.get("story", {}))
 	_restore_camera_data(data.get("camera", {}))
@@ -290,8 +293,10 @@ func add_lamb(emit_added_signal := true) -> Node:
 	if not sheep_template:
 		return null
 	var lamb := sheep_template.duplicate() as AnimatedSprite2D
-	lamb.name = "Sheep%d" % next_sheep_id
+	var new_sheep_id := next_sheep_id
+	lamb.name = "Sheep%d" % new_sheep_id
 	next_sheep_id += 1
+	lamb.set("sheep_id", new_sheep_id)
 	lamb.set("starting_age_days", 0)
 	lamb.set("sheep_name", _generate_unique_sheep_name())
 	lamb.set("sex", _generate_random_sex())
@@ -325,7 +330,7 @@ func sell_oldest_adults(count: int) -> int:
 		return 0
 	var adults: Array[Node] = []
 	for sheep in sheep_group.get_children():
-		if sheep.has_method("is_adult") and sheep.is_adult() and not sheep.is_pregnant():
+		if sheep.has_method("is_adult") and sheep.is_adult() and not sheep.is_pregnant() and not sheep.is_lost():
 			adults.append(sheep)
 	if adults.size() < count:
 		return 0
@@ -351,6 +356,7 @@ func sell_specific_sheep(sheep_to_sell: Array[Node]) -> int:
 			or not sheep.has_method("is_adult")
 			or not sheep.is_adult()
 			or sheep.is_pregnant()
+			or sheep.is_lost()
 			or unique_sheep.has(sheep)
 		):
 			return 0
@@ -378,7 +384,7 @@ func get_adult_sheep_count() -> int:
 func get_sellable_adult_count() -> int:
 	return sheep_group.get_children().filter(
 		func(sheep: Node) -> bool:
-			return sheep.has_method("is_adult") and sheep.is_adult() and not sheep.is_pregnant()
+			return sheep.has_method("is_adult") and sheep.is_adult() and not sheep.is_pregnant() and not sheep.is_lost()
 	).size()
 
 
@@ -432,7 +438,10 @@ func get_first_building_position(item_id: StringName) -> Vector2:
 
 
 func get_sheep_capacity() -> int:
-	return get_land_chunk_count() * CAPACITY_PER_LAND_CHUNK + get_building_count(&"lamb_shelter") * CAPACITY_PER_LAMB_SHELTER
+	var shelter_capacity := 0
+	for shelter in build_controller.get_buildings_by_type(&"lamb_shelter"):
+		shelter_capacity += [4, 6, 8][build_controller.get_building_level(shelter) - 1]
+	return get_land_chunk_count() * CAPACITY_PER_LAND_CHUNK + shelter_capacity
 
 
 func get_available_sheep_capacity() -> int:
@@ -446,6 +455,8 @@ func get_breeding_failure_reason(mother: Node, father: Node) -> String:
 		return "繁育需要选择两只不同的羊"
 	if mother.get_sex() != mother.SEX_FEMALE or father.get_sex() != father.SEX_MALE:
 		return "配对必须由一只母羊和一只公羊组成"
+	if are_close_relatives(mother, father):
+		return "父母与子女、同父或同母的兄妹不能配对"
 	var mother_issue := _breeding_issue(mother)
 	if not mother_issue.is_empty():
 		return "%s：%s" % [mother.get_sheep_name(), mother_issue]
@@ -463,7 +474,7 @@ func start_breeding(mother: Node, father: Node) -> bool:
 	if not get_breeding_failure_reason(mother, father).is_empty():
 		return false
 	var litter_size := _roll_litter_size(mini(5, get_available_sheep_capacity()))
-	if not mother.start_pregnancy(litter_size):
+	if not mother.start_pregnancy(litter_size, father.get_sheep_id()):
 		return false
 	father.start_breeding_cooldown(father.FATHER_COOLDOWN_DAYS)
 	_show_breeding_heart(mother, father)
@@ -485,12 +496,20 @@ func run_automatic_breeding() -> bool:
 			fathers.append(sheep)
 	if mothers.is_empty() or fathers.is_empty():
 		return false
-	var mother := mothers[profile_random.randi_range(0, mothers.size() - 1)]
-	fathers.sort_custom(
-		func(first: Node, second: Node) -> bool:
-			return first.global_position.distance_squared_to(mother.global_position) < second.global_position.distance_squared_to(mother.global_position)
-	)
-	return start_breeding(mother, fathers[0])
+	var mother_start := profile_random.randi_range(0, mothers.size() - 1)
+	for offset in mothers.size():
+		var mother: Node = mothers[(mother_start + offset) % mothers.size()]
+		var compatible_fathers: Array[Node] = fathers.filter(
+			func(father: Node) -> bool: return not are_close_relatives(mother, father)
+		)
+		if compatible_fathers.is_empty():
+			continue
+		compatible_fathers.sort_custom(
+			func(first: Node, second: Node) -> bool:
+				return first.global_position.distance_squared_to(mother.global_position) < second.global_position.distance_squared_to(mother.global_position)
+		)
+		return start_breeding(mother, compatible_fathers[0])
+	return false
 
 
 func complete_birth(mother: Node) -> Node:
@@ -502,6 +521,9 @@ func complete_birth(mother: Node) -> Node:
 		return null
 	var mother_was_sick: bool = not mother.is_healthy()
 	var litter_size: int = mother.get_expected_lamb_count()
+	var father_id: int = mother.get_pregnancy_father_id()
+	var father := get_sheep_by_id(father_id)
+	var newborn_generation := maxi(mother.get_generation(), father.get_generation() if father else 0) + 1
 	var newborns: Array[Node] = []
 	for index in litter_size:
 		var lamb := add_lamb(false)
@@ -510,6 +532,7 @@ func complete_birth(mother: Node) -> Node:
 		var angle := TAU * float(index) / float(maxi(1, litter_size))
 		var offset := Vector2.from_angle(angle) * (22.0 + float(index % 2) * 8.0)
 		lamb.global_position = clamp_point_to_land(mother.global_position + offset, mother.global_position)
+		lamb.set_lineage(mother.get_sheep_id(), father_id, newborn_generation)
 		if mother_was_sick and profile_random.randf() < 0.35:
 			lamb.make_sick()
 		newborns.append(lamb)
@@ -519,6 +542,49 @@ func complete_birth(mother: Node) -> Node:
 	for lamb in newborns:
 		lamb_born.emit(lamb, mother)
 	return newborns[0]
+
+
+func get_sheep_by_id(sheep_id: int) -> Node:
+	if sheep_id <= 0:
+		return null
+	for sheep in sheep_group.get_children():
+		if sheep.get_sheep_id() == sheep_id and not sheep.is_queued_for_deletion():
+			return sheep
+	return null
+
+
+func are_close_relatives(first: Node, second: Node) -> bool:
+	if not _is_flock_sheep(first) or not _is_flock_sheep(second):
+		return false
+	var first_id: int = first.get_sheep_id()
+	var second_id: int = second.get_sheep_id()
+	if first_id in [second.get_mother_id(), second.get_father_id()]:
+		return true
+	if second_id in [first.get_mother_id(), first.get_father_id()]:
+		return true
+	for parent_id in [first.get_mother_id(), first.get_father_id()]:
+		if parent_id > 0 and parent_id in [second.get_mother_id(), second.get_father_id()]:
+			return true
+	return false
+
+
+func get_lineage_text(sheep: Node) -> String:
+	if not _is_flock_sheep(sheep):
+		return "谱系未知"
+	if sheep.get_generation() <= 0:
+		return "第 0 代 · 外来基础羊"
+	return "第 %d 代 · 母 %s · 父 %s" % [
+		sheep.get_generation(),
+		_get_parent_display_name(sheep.get_mother_id()),
+		_get_parent_display_name(sheep.get_father_id()),
+	]
+
+
+func _get_parent_display_name(parent_id: int) -> String:
+	if parent_id <= 0:
+		return "未知"
+	var parent := get_sheep_by_id(parent_id)
+	return parent.get_sheep_name() if parent else "#%d" % parent_id
 
 
 func _roll_litter_size(maximum_size: int) -> int:
@@ -554,8 +620,10 @@ func _breeding_issue(sheep: Node) -> String:
 
 
 func get_lamb_sickness_chance() -> float:
-	var shelter_count := get_building_count(&"lamb_shelter")
-	return maxf(0.01, BASE_LAMB_SICKNESS_CHANCE * pow(0.5, shelter_count))
+	var chance := BASE_LAMB_SICKNESS_CHANCE
+	for shelter in build_controller.get_buildings_by_type(&"lamb_shelter"):
+		chance *= [0.5, 0.35, 0.25][build_controller.get_building_level(shelter) - 1]
+	return maxf(0.01, chance)
 
 
 func get_healthy_adult_count() -> int:

@@ -5,12 +5,15 @@ signal market_viewed
 signal normal_sale_completed(count: int, income: int)
 signal order_completed(order_id: String, count: int, income: int)
 signal order_expired(order_id: String)
+signal bloodline_order_completed(order_id: String, count: int, income: int)
 
 const DEFAULT_NORMAL_PRICE := 320
 const NORMAL_PRICE_MIN := 280
 const NORMAL_PRICE_MAX := 360
 const ORDER_PRICE_MIN := 360
 const ORDER_PRICE_MAX := 460
+const BLOODLINE_PRICE_MIN := 500
+const BLOODLINE_PRICE_MAX := 620
 const ORDERS_PER_DAY := 2
 
 const STATUS_ACTIVE := &"active"
@@ -20,6 +23,7 @@ const STATUS_EXPIRED := &"expired"
 const TYPE_HEALTHY_ADULT := &"healthy_adult"
 const TYPE_SEX := &"sex"
 const TYPE_YOUNG_ADULT := &"young_adult"
+const TYPE_BLOODLINE := &"bloodline"
 
 @onready var world_controller: Node = get_parent()
 @onready var top_hud: Control = get_node("../HUD/TopHUD")
@@ -175,6 +179,8 @@ func deliver_order(order_id: String) -> Dictionary:
 	order.delivered_names = delivered_names
 	top_hud.add_money(income)
 	order_completed.emit(order.id, quantity, income)
+	if order.type == TYPE_BLOODLINE:
+		bloodline_order_completed.emit(order.id, quantity, income)
 	market_changed.emit()
 	return {
 		"success": true,
@@ -215,6 +221,8 @@ func _generate_daily_orders(day: int) -> void:
 		{"type": TYPE_SEX, "sex": &"female"},
 		{"type": TYPE_YOUNG_ADULT, "sex": &""},
 	]
+	if day >= 20:
+		templates.append({"type": TYPE_BLOODLINE, "sex": &""})
 	for index in range(templates.size() - 1, 0, -1):
 		var swap_index := random.randi_range(0, index)
 		var temporary := templates[index]
@@ -227,9 +235,13 @@ func _generate_daily_orders(day: int) -> void:
 
 func _make_order(day: int, type: StringName, required_sex: StringName, random: RandomNumberGenerator) -> Dictionary:
 	var quantity := random.randi_range(1, 3)
-	if type in [TYPE_SEX, TYPE_YOUNG_ADULT]:
+	if type in [TYPE_SEX, TYPE_YOUNG_ADULT, TYPE_BLOODLINE]:
 		quantity = random.randi_range(1, 2)
-	var unit_price := random.randi_range(ORDER_PRICE_MIN / 10, ORDER_PRICE_MAX / 10) * 10
+	var unit_price := (
+		random.randi_range(BLOODLINE_PRICE_MIN / 10, BLOODLINE_PRICE_MAX / 10) * 10
+		if type == TYPE_BLOODLINE else
+		random.randi_range(ORDER_PRICE_MIN / 10, ORDER_PRICE_MAX / 10) * 10
+	)
 	var order := {
 		"id": "market_%d_%d" % [day, next_order_serial],
 		"type": type,
@@ -262,6 +274,11 @@ func _order_text(order: Dictionary) -> Dictionary:
 				"title": "青年羊采购",
 				"description": "%d 只 6–12 天健康成年羊" % order.quantity,
 			}
+		TYPE_BLOODLINE:
+			return {
+				"title": "本岛血统订单",
+				"description": "%d 只第 1 代以上健康成年羊" % order.quantity,
+			}
 	return {
 		"title": "健康成年羊采购",
 		"description": "%d 只健康成年羊，公母不限" % order.quantity,
@@ -280,6 +297,9 @@ func _get_matching_sheep(order: Dictionary) -> Array[Node]:
 			TYPE_YOUNG_ADULT:
 				if sheep.get_age_days() < 6 or sheep.get_age_days() > 12:
 					continue
+			TYPE_BLOODLINE:
+				if sheep.get_generation() < 1:
+					continue
 		result.append(sheep)
 	result.sort_custom(
 		func(first: Node, second: Node) -> bool:
@@ -297,6 +317,7 @@ func _get_normal_sale_candidates() -> Array[Node]:
 			sheep.has_method("is_adult")
 			and sheep.is_adult()
 			and not sheep.is_pregnant()
+			and not sheep.is_lost()
 			and not sheep.is_queued_for_deletion()
 		):
 			result.append(sheep)
@@ -314,11 +335,12 @@ func _is_order_eligible(sheep: Node) -> bool:
 		and sheep.is_adult()
 		and sheep.is_healthy()
 		and not sheep.is_pregnant()
+		and not sheep.is_lost()
 	)
 
 
 func _shortage_message(order: Dictionary, required: int, available: int) -> String:
-	return "%s不足：需要 %d 只，目前只有 %d 只；生病或怀孕的羊不能交付" % [
+	return "%s不足：需要 %d 只，目前只有 %d 只；生病、怀孕或走失的羊不能交付" % [
 		order.description, required, available,
 	]
 
@@ -355,10 +377,16 @@ func _roll_normal_price(day: int) -> int:
 func _is_valid_saved_order(order: Dictionary) -> bool:
 	return (
 		String(order.get("id", "")) != ""
-		and order.type in [TYPE_HEALTHY_ADULT, TYPE_SEX, TYPE_YOUNG_ADULT]
+		and order.type in [TYPE_HEALTHY_ADULT, TYPE_SEX, TYPE_YOUNG_ADULT, TYPE_BLOODLINE]
 		and order.status in [STATUS_ACTIVE, STATUS_COMPLETED, STATUS_EXPIRED]
 		and int(order.get("quantity", 0)) in [1, 2, 3]
-		and int(order.get("unit_price", 0)) >= ORDER_PRICE_MIN
-		and int(order.get("unit_price", 0)) <= ORDER_PRICE_MAX
+		and _is_valid_order_price(order)
 		and int(order.get("deadline_day", 0)) >= int(order.get("created_day", 0))
 	)
+
+
+func _is_valid_order_price(order: Dictionary) -> bool:
+	var price := int(order.get("unit_price", 0))
+	if order.type == TYPE_BLOODLINE:
+		return price >= BLOODLINE_PRICE_MIN and price <= BLOODLINE_PRICE_MAX
+	return price >= ORDER_PRICE_MIN and price <= ORDER_PRICE_MAX

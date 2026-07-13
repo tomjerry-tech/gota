@@ -10,6 +10,7 @@ var age_label: Label
 var stage_label: Label
 var health_label: Label
 var breeding_label: Label
+var lineage_label: Label
 var hunger_bar: ProgressBar
 var hunger_value_label: Label
 
@@ -85,7 +86,7 @@ func _build_interface() -> void:
 
 	var content := Panel.new()
 	content.position = Vector2(30, 52)
-	content.size = Vector2(544, 318)
+	content.size = Vector2(544, 336)
 	content.add_theme_stylebox_override("panel", _panel_style())
 	add_child(content)
 
@@ -121,22 +122,24 @@ func _build_interface() -> void:
 	content.add_child(health_label)
 	breeding_label = _make_label(Vector2(166, 186), Vector2(338, 30), 17)
 	content.add_child(breeding_label)
+	lineage_label = _make_label(Vector2(166, 216), Vector2(338, 30), 15)
+	content.add_child(lineage_label)
 
-	var hunger_title := _make_label(Vector2(166, 220), Vector2(220, 30), 17)
+	var hunger_title := _make_label(Vector2(166, 246), Vector2(220, 30), 17)
 	hunger_title.text = "饥饿值"
 	content.add_child(hunger_title)
 	hunger_bar = ProgressBar.new()
-	hunger_bar.position = Vector2(166, 250)
+	hunger_bar.position = Vector2(166, 274)
 	hunger_bar.size = Vector2(270, 30)
 	hunger_bar.min_value = 0.0
 	hunger_bar.max_value = 100.0
 	hunger_bar.show_percentage = false
 	content.add_child(hunger_bar)
-	hunger_value_label = _make_label(Vector2(444, 248), Vector2(60, 32), 18)
+	hunger_value_label = _make_label(Vector2(444, 272), Vector2(60, 32), 18)
 	hunger_value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	content.add_child(hunger_value_label)
 
-	var hint := _make_label(Vector2(24, 286), Vector2(480, 26), 14)
+	var hint := _make_label(Vector2(24, 307), Vector2(480, 26), 13)
 	hint.text = "修改名字后按回车，或点击输入框外保存。"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_color_override("font_color", Color("665044"))
@@ -175,6 +178,8 @@ func _refresh_profile(refresh_name: bool) -> void:
 		"font_color",
 		Color("a34f68") if selected_sheep.is_pregnant() else Color("4d5860")
 	)
+	lineage_label.text = "谱系：%s" % world_controller.get_lineage_text(selected_sheep)
+	lineage_label.add_theme_color_override("font_color", Color("294b5b"))
 	var hunger_value: int = selected_sheep.get_hunger_percent()
 	hunger_bar.value = hunger_value
 	hunger_value_label.text = "%d / 100" % hunger_value

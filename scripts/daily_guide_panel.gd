@@ -3,23 +3,46 @@ extends Control
 const SHEPHERD_TEXTURE: Texture2D = preload("res://assets/tiny_swords/shepherd/shepherd_backup/shepherd_idle_down.png")
 
 @onready var routine_manager: Node = get_node("../../DayRoutineManager")
+@onready var lost_sheep_manager: Node = get_node("../../LostSheepManager")
 
 var title_label: Label
 var body_label: Label
 var panel: Panel
+var locate_button: Button
+var guidance_title := ""
+var guidance_body := ""
+var guidance_urgent := false
 
 
 func _ready() -> void:
 	_build_interface()
 	routine_manager.guidance_changed.connect(_on_guidance_changed)
+	lost_sheep_manager.mission_changed.connect(_refresh_display)
 	routine_manager.last_guidance_key = ""
 	routine_manager._refresh_guidance()
+	_refresh_display()
 
 
 func _on_guidance_changed(title: String, body: String, urgent: bool) -> void:
-	title_label.text = title
-	body_label.text = body
-	panel.add_theme_stylebox_override("panel", _panel_style(urgent))
+	guidance_title = title
+	guidance_body = body
+	guidance_urgent = urgent
+	_refresh_display()
+
+
+func _refresh_display() -> void:
+	if not title_label:
+		return
+	var rescue_active: bool = lost_sheep_manager.has_active_rescue()
+	title_label.text = lost_sheep_manager.get_status_title() if rescue_active else guidance_title
+	body_label.text = lost_sheep_manager.get_status_body() if rescue_active else guidance_body
+	panel.add_theme_stylebox_override("panel", _panel_style(true if rescue_active else guidance_urgent))
+	locate_button.visible = rescue_active
+	title_label.size.x = 180.0 if rescue_active else 236.0
+
+
+func _locate_lost_sheep() -> void:
+	lost_sheep_manager.locate_next_lost_sheep()
 
 
 func _build_interface() -> void:
@@ -51,6 +74,14 @@ func _build_interface() -> void:
 	body_label.add_theme_font_size_override("font_size", 13)
 	body_label.add_theme_color_override("font_color", Color("49362b"))
 	panel.add_child(body_label)
+	locate_button = Button.new()
+	locate_button.position = Vector2(250, 7)
+	locate_button.size = Vector2(60, 28)
+	locate_button.text = "定位"
+	locate_button.add_theme_font_size_override("font_size", 12)
+	locate_button.pressed.connect(_locate_lost_sheep)
+	locate_button.hide()
+	panel.add_child(locate_button)
 
 
 func _panel_style(urgent: bool) -> StyleBoxFlat:

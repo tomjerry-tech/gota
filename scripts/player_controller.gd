@@ -178,14 +178,14 @@ func send_to_rest(world_position: Vector2) -> bool:
 	return true
 
 
-func wake_up() -> void:
+func wake_up(natural_recovery := DAWN_RECOVERY) -> void:
 	var slept_inside := resting
 	if resting:
 		global_position = world_controller.clamp_point_to_land(rest_target, global_position)
 	resting = false
 	going_to_rest = false
 	visible = true
-	recover_stamina(MAX_STAMINA if slept_inside else DAWN_RECOVERY)
+	recover_stamina(MAX_STAMINA if slept_inside else float(natural_recovery))
 	_play_idle()
 
 

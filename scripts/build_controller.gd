@@ -5,9 +5,12 @@ signal fence_placed
 signal land_expanded
 signal gate_toggled(fence: Node, is_open: bool)
 signal building_removed(item_id: StringName)
+signal building_upgraded(building: Node, item_id: StringName, level: int)
 
 const GRID_SIZE := 40.0
 const FENCE_PRICE := 8
+const UPGRADE_UNLOCK_DAY := 20
+const MAX_BUILDING_LEVEL := 3
 const VALID_TINT := Color(0.68, 1.0, 0.68, 0.78)
 const INVALID_TINT := Color(1.0, 0.48, 0.42, 0.78)
 const FENCE_TEXTURE := preload("res://assets/tiny_swords/ui/build_menu/fence.png")
@@ -39,6 +42,11 @@ const BUILDINGS := {
 		"scale": Vector2(0.165, 0.165),
 		"footprint": Vector2(120.0, 84.0),
 	},
+}
+const UPGRADE_COSTS := {
+	&"dog_house": {2: 500, 3: 900},
+	&"shepherd_house": {2: 700, 3: 1200},
+	&"lamb_shelter": {2: 600, 3: 1000},
 }
 
 @onready var buildings_root: Node2D = get_node("../Island/Buildings")
@@ -259,6 +267,58 @@ func get_buildings_by_type(item_id: StringName) -> Array[Node2D]:
 	return result
 
 
+func get_building_level(building: Node) -> int:
+	if not is_instance_valid(building) or not UPGRADE_COSTS.has(building.get_meta("build_item_id", &"")):
+		return 1
+	return clampi(int(building.get_meta("building_level", 1)), 1, MAX_BUILDING_LEVEL)
+
+
+func get_highest_building_level(item_id: StringName) -> int:
+	var result := 0
+	for building in get_buildings_by_type(item_id):
+		result = maxi(result, get_building_level(building))
+	return result
+
+
+func get_upgrade_cost(building: Node) -> int:
+	if not is_instance_valid(building):
+		return 0
+	var item_id: StringName = building.get_meta("build_item_id", &"")
+	var next_level := get_building_level(building) + 1
+	return int((UPGRADE_COSTS.get(item_id, {}) as Dictionary).get(next_level, 0))
+
+
+func try_upgrade_building(building: Node2D) -> Dictionary:
+	if not is_instance_valid(building) or not UPGRADE_COSTS.has(building.get_meta("build_item_id", &"")):
+		return {"success": false, "message": "这座建筑不能升级"}
+	if top_hud.get_day() < UPGRADE_UNLOCK_DAY:
+		return {"success": false, "message": "第 %d 天收到老牧民来信后解锁升级" % UPGRADE_UNLOCK_DAY}
+	var current_level := get_building_level(building)
+	if current_level >= MAX_BUILDING_LEVEL:
+		return {"success": false, "message": "这座建筑已经达到最高等级"}
+	var price := get_upgrade_cost(building)
+	if not top_hud.spend_money(price):
+		return {"success": false, "message": "金币不足，升级需要 %d 金币" % price}
+	var item_id: StringName = building.get_meta("build_item_id", &"")
+	var next_level := current_level + 1
+	building.set_meta("building_level", next_level)
+	_update_building_level_badge(building)
+	building_upgraded.emit(building, item_id, next_level)
+	return {"success": true, "message": "%s已升级到 Lv.%d" % [BUILDINGS[item_id].display_name, next_level]}
+
+
+func get_upgrade_effect_text(building: Node) -> String:
+	var level := get_building_level(building)
+	match building.get_meta("build_item_id", &""):
+		&"dog_house":
+			return "未进屋恢复 %d 点；守夜额外 +%d 分" % [[25, 40, 55][level - 1], (level - 1) * 2]
+		&"shepherd_house":
+			return "未进屋恢复 %d 点；自动赶羊提前 %d%%" % [[25, 40, 55][level - 1], (level - 1) * 4]
+		&"lamb_shelter":
+			return "容量 +%d；幼羊生病倍率 %d%%" % [[4, 6, 8][level - 1], [50, 35, 25][level - 1]]
+	return ""
+
+
 func get_building_at(world_position: Vector2) -> Node2D:
 	var children := buildings_root.get_children()
 	for index in range(children.size() - 1, -1, -1):
@@ -323,6 +383,7 @@ func get_save_data() -> Array[Dictionary]:
 			"item_id": String(item_id),
 			"position": [building.position.x, building.position.y],
 			"cost": int(building.get_meta("cost", 0)),
+			"level": get_building_level(building),
 		}
 		if item_id == &"fence":
 			var grazing_rect: Rect2 = building.get_meta("grazing_rect", Rect2())
@@ -354,7 +415,12 @@ func restore_save_data(data: Variant) -> void:
 		elif BUILDINGS.has(item_id):
 			var saved_position: Variant = entry.get("position", [])
 			if saved_position is Array and saved_position.size() >= 2:
-				_create_building(item_id, Vector2(float(saved_position[0]), float(saved_position[1])), false)
+				_create_building(
+					item_id,
+					Vector2(float(saved_position[0]), float(saved_position[1])),
+					false,
+					clampi(int(entry.get("level", 1)), 1, MAX_BUILDING_LEVEL)
+				)
 
 
 func _create_fence(fence_rect: Rect2, cost: int, emit_event: bool, gate_open := false) -> Node2D:
@@ -440,7 +506,7 @@ func set_gate_open(fence: Node2D, is_open: bool, emit_event := false) -> bool:
 	return true
 
 
-func _create_building(item_id: StringName, build_position: Vector2, emit_event: bool) -> Node2D:
+func _create_building(item_id: StringName, build_position: Vector2, emit_event: bool, level := 1) -> Node2D:
 	var config: Dictionary = BUILDINGS[item_id]
 	var footprint := _building_footprint(build_position, config.footprint)
 	var building_root := Node2D.new()
@@ -448,16 +514,46 @@ func _create_building(item_id: StringName, build_position: Vector2, emit_event: 
 	building_root.position = build_position
 	building_root.set_meta("build_item_id", item_id)
 	building_root.set_meta("cost", config.price)
+	building_root.set_meta("building_level", clampi(level, 1, MAX_BUILDING_LEVEL))
 	building_root.set_meta("footprints", [footprint])
 	buildings_root.add_child(building_root)
 	var sprite := _make_building_sprite(config, Color.WHITE)
 	sprite.position = Vector2.ZERO
 	building_root.add_child(sprite)
 	_add_building_collider(building_root, config.footprint)
+	_update_building_level_badge(building_root)
 	placed_footprints.append(footprint)
 	if emit_event:
 		building_placed.emit(item_id)
 	return building_root
+
+
+func _update_building_level_badge(building: Node2D) -> void:
+	var badge := building.get_node_or_null("LevelBadge") as Label
+	var level := get_building_level(building)
+	if level <= 1:
+		if badge:
+			badge.hide()
+		return
+	if not badge:
+		badge = Label.new()
+		badge.name = "LevelBadge"
+		badge.position = Vector2(-27, -72)
+		badge.size = Vector2(54, 24)
+		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		badge.z_index = 20
+		badge.add_theme_font_size_override("font_size", 13)
+		badge.add_theme_color_override("font_color", Color("fff0b0"))
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color("294b5b")
+		style.border_color = Color("7fd8df")
+		style.set_border_width_all(2)
+		style.set_corner_radius_all(3)
+		badge.add_theme_stylebox_override("normal", style)
+		building.add_child(badge)
+	badge.text = "Lv.%d" % level
+	badge.show()
 
 
 func _clear_placed_buildings() -> void:

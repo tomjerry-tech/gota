@@ -36,6 +36,7 @@ func _ready() -> void:
 	world_controller.sheep_sold.connect(_on_sheep_sold)
 	top_hud.day_changed.connect(_on_day_changed)
 	build_controller.building_placed.connect(_on_building_placed)
+	build_controller.building_upgraded.connect(_on_building_upgraded)
 	build_controller.fence_placed.connect(_on_fence_placed)
 	build_controller.land_expanded.connect(_on_land_expanded)
 	medical_menu.sheep_treated.connect(_on_sheep_treated)
@@ -199,6 +200,18 @@ func _build_feasible_pool(day: int) -> Array[Dictionary]:
 		pool.append(_make_task(&"end_grass", "保持草场充足", "当天结束时草总量不少于羊数量", 1, _scaled_reward(70, difficulty)))
 	if dog_manager.has_active_dog() and not build_controller.get_fence_roots().is_empty():
 		pool.append(_make_task(&"dog_roundup", "牧羊犬协作", "使用牧羊犬完成一次傍晚回圈", 1, _scaled_reward(140, difficulty)))
+	if day >= build_controller.UPGRADE_UNLOCK_DAY:
+		var can_afford_upgrade := false
+		for item_id: StringName in HOUSE_DATA:
+			for building in build_controller.get_buildings_by_type(item_id):
+				var price: int = build_controller.get_upgrade_cost(building)
+				if price > 0 and money >= price:
+					can_afford_upgrade = true
+					break
+			if can_afford_upgrade:
+				break
+		if can_afford_upgrade:
+			pool.append(_make_task(&"upgrade_building", "整修牧场建筑", "升级一座已有小屋", 1, _scaled_reward(160, difficulty)))
 	return pool
 
 
@@ -243,6 +256,10 @@ func _on_building_placed(item_id: StringName) -> void:
 			and task.get("item_id", &"") == item_id
 		):
 			_advance_task(task, 1)
+
+
+func _on_building_upgraded(_building: Node, _item_id: StringName, _level: int) -> void:
+	_advance_tasks(&"upgrade_building", 1)
 
 
 func _on_fence_placed() -> void:

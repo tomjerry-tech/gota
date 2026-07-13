@@ -16,6 +16,7 @@ signal event_finished(event_id: StringName)
 @onready var sheep_menu: Control = get_node("../HUD/SheepMenu")
 @onready var market_manager: Node = get_node("../MarketOrderManager")
 @onready var day_routine_manager: Node = get_node("../DayRoutineManager")
+@onready var lost_sheep_manager: Node = get_node("../LostSheepManager")
 @onready var world_camera: Camera2D = get_node("../WorldCamera")
 @onready var player: AnimatedSprite2D = get_node("../Island/Shepherd")
 @onready var roundup_manager: Control = get_node("../HUD/RoundupStatus")
@@ -34,6 +35,7 @@ func _ready() -> void:
 	automatic_presentation_enabled = DisplayServer.get_name() != "headless"
 	top_hud.day_changed.connect(_on_day_changed)
 	build_controller.building_placed.connect(_on_building_placed)
+	build_controller.building_upgraded.connect(_on_building_upgraded)
 	build_controller.land_expanded.connect(_on_land_expanded)
 	build_controller.gate_toggled.connect(_on_gate_toggled)
 	player.whistle_used.connect(_on_whistle_used)
@@ -44,7 +46,14 @@ func _ready() -> void:
 	roundup_manager.dog_roundup_succeeded.connect(_on_dog_roundup_succeeded)
 	market_manager.market_viewed.connect(_on_market_viewed)
 	market_manager.order_completed.connect(_on_market_order_completed)
+	market_manager.bloodline_order_completed.connect(_on_bloodline_order_completed)
+	world_controller.lamb_born.connect(_on_lineage_lamb_born)
 	day_routine_manager.wolf_den_discovered.connect(_on_wolf_den_discovered)
+	day_routine_manager.wolf_tracks_appeared.connect(_on_wolf_tracks_appeared)
+	day_routine_manager.wolf_patrol_completed.connect(_on_wolf_patrol_completed)
+	lost_sheep_manager.mission_started.connect(_on_lost_rescue_started)
+	lost_sheep_manager.mission_completed.connect(_on_lost_rescue_completed)
+	lost_sheep_manager.mission_failed.connect(_on_lost_rescue_failed)
 	daily_report.report_closed.connect(_on_report_closed)
 	right_side_panel.story_action_requested.connect(_on_story_action_requested)
 	right_side_panel.story_closed.connect(_on_story_closed)
@@ -122,11 +131,17 @@ func _on_day_changed(new_day: int) -> void:
 		queue_event(&"day_4_medical")
 	if new_day >= 8 and not is_event_fired(&"day_8_commission"):
 		queue_event(&"day_8_commission")
+	if new_day >= 20 and not is_event_fired(&"day_20_building_upgrades"):
+		queue_event(&"day_20_building_upgrades")
 
 
 func _on_building_placed(item_id: StringName) -> void:
 	if item_id == &"lamb_shelter":
 		queue_event(&"first_lamb_shelter")
+
+
+func _on_building_upgraded(_building: Node, _item_id: StringName, _level: int) -> void:
+	queue_event(&"first_building_upgrade")
 
 
 func _on_land_expanded() -> void:
@@ -165,8 +180,37 @@ func _on_market_order_completed(_order_id: String, _count: int, _income: int) ->
 	queue_event(&"first_market_order")
 
 
+func _on_bloodline_order_completed(_order_id: String, _count: int, _income: int) -> void:
+	queue_event(&"first_bloodline_order")
+
+
+func _on_lineage_lamb_born(lamb: Node, _mother: Node) -> void:
+	if lamb.get_generation() >= 1:
+		queue_event(&"first_lineage_lamb")
+
+
 func _on_wolf_den_discovered() -> void:
 	queue_event(&"wolf_den_discovered")
+
+
+func _on_wolf_tracks_appeared(_day: int) -> void:
+	queue_event(&"fresh_wolf_tracks")
+
+
+func _on_wolf_patrol_completed(_dog: Node, _defense_bonus: int) -> void:
+	queue_event(&"first_wolf_patrol")
+
+
+func _on_lost_rescue_started(_total_count: int, _deadline_day: int) -> void:
+	queue_event(&"lost_sheep_rescue")
+
+
+func _on_lost_rescue_completed(_reward: int) -> void:
+	queue_event(&"lost_sheep_rescued")
+
+
+func _on_lost_rescue_failed(_missing_count: int) -> void:
+	queue_event(&"lost_sheep_missed")
 
 
 func _on_report_closed() -> void:
@@ -212,6 +256,10 @@ func _execute_pending_action() -> void:
 		&"open_market":
 			bottom_toolbar.select_tab(&"sheep")
 			sheep_menu.open_market_page()
+		&"locate_lost_sheep":
+			lost_sheep_manager.locate_next_lost_sheep()
+		&"locate_wolf_tracks":
+			world_camera.focus_on_world_position(day_routine_manager.wolf_tracks_position)
 		&"confirm":
 			pass
 	call_deferred("_try_present_automatically")
@@ -282,6 +330,12 @@ func _build_event_data(event_id: StringName) -> Dictionary:
 				),
 				[{"id": &"confirm", "label": "继续经营"}]
 			)
+		&"day_20_building_upgrades":
+			return _event(
+				event_id, "老牧民的来信",
+				"牧场已经有了规模，只靠增加小屋会越来越占地方。\n从今天起，点击已有小屋可以升级；不同建筑会强化容量、休息或守夜能力。",
+				[{"id": &"open_build", "label": "查看现有建筑"}, {"id": &"confirm", "label": "稍后规划"}]
+			)
 		&"first_land_expansion":
 			return _event(
 				event_id, "新的放牧土地",
@@ -293,6 +347,12 @@ func _build_event_data(event_id: StringName) -> Dictionary:
 				event_id, "小羊棚投入使用",
 				"每座小羊棚增加 4 点容量。\n它还会降低幼羊每天生病的概率，适合在购买幼羊前准备。",
 				[{"id": &"confirm", "label": "知道了"}]
+			)
+		&"first_building_upgrade":
+			return _event(
+				event_id, "第一座升级建筑",
+				"旧建筑经过整修后开始提供更强效果，地图上的等级徽记会显示当前等级。\n继续升级的费用更高，优先补足牧场当前最缺少的能力。",
+				[{"id": &"confirm", "label": "完成整修"}]
 			)
 		&"first_whistle":
 			return _event(
@@ -348,11 +408,58 @@ func _build_event_data(event_id: StringName) -> Dictionary:
 			order_done.speaker = "行商人"
 			order_done.subtitle = "往来小岛的牲畜商"
 			return order_done
+		&"first_lineage_lamb":
+			return _event(
+				event_id, "本岛第一代",
+				"第一批带有完整父母记录的幼羊出生了。\n羊资料会保留世代与父母；自动繁育也会避开父母子女和同父、同母兄妹。",
+				[{"id": &"confirm", "label": "查看它长大"}]
+			)
+		&"first_bloodline_order":
+			var bloodline_done := _event(
+				event_id, "血统订单完成",
+				"本岛繁育羊的记录清楚，行商人愿意支付更高价格。\n保留不同家系的成年公羊和母羊，能持续完成这类订单。",
+				[{"id": &"open_market", "label": "查看后续订单"}, {"id": &"confirm", "label": "继续经营"}]
+			)
+			bloodline_done.speaker = "行商人"
+			bloodline_done.subtitle = "往来小岛的牲畜商"
+			return bloodline_done
 		&"wolf_den_discovered":
 			return _event(
 				event_id, "边缘土地的狼窝",
 				"牧场最外侧的狼窝出现了新的活动痕迹，夜间需要更谨慎。\n让体力充足的牧羊犬守夜，并在入夜前把羊赶入围栏、关闭大门。",
 				[{"id": &"open_build", "label": "检查建造"}, {"id": &"confirm", "label": "加强夜间防护"}]
+			)
+		&"fresh_wolf_tracks":
+			return _event(
+				event_id, "新鲜脚印",
+				"狼窝通往牧场的边缘出现了新鲜脚印。\n白天选中一只牧羊犬并派它巡查，能为今晚增加 15 点防护。",
+				[{"id": &"locate_wolf_tracks", "label": "定位狼迹"}, {"id": &"confirm", "label": "安排巡查"}]
+			)
+		&"first_wolf_patrol":
+			return _event(
+				event_id, "巡查归来",
+				"牧羊犬确认了狼群靠近的方向，今晚防护增加 15 点。\n巡查会消耗少量体力，每天只能从当日的新鲜狼迹获得一次加成。",
+				[{"id": &"confirm", "label": "准备入夜"}]
+			)
+		&"lost_sheep_rescue":
+			return _event(
+				event_id, "夜里少了几声羊铃",
+				"%s在狼窝骚扰后走散了。\n第 %d 天结束前靠近它们，或把它们赶进关闭的围栏，就能完成救援。" % [
+					lost_sheep_manager.get_lost_sheep_names(), lost_sheep_manager.deadline_day,
+				],
+				[{"id": &"locate_lost_sheep", "label": "定位走失羊"}, {"id": &"confirm", "label": "开始寻找"}]
+			)
+		&"lost_sheep_rescued":
+			return _event(
+				event_id, "羊群重新聚齐",
+				"走失的小羊已经全部回到照料范围。\n这次救援获得 %d 金币，夜间关门和保持犬只体力仍是更稳妥的办法。" % lost_sheep_manager.last_reward,
+				[{"id": &"confirm", "label": "收下奖励"}]
+			)
+		&"lost_sheep_missed":
+			return _event(
+				event_id, "迟到的脚印",
+				"巡查的牧民把剩余 %d 只羊带回了牧场，但本次救援没有奖励。\n下次可先用定位找到目标，再用口哨或牧羊犬缩短搜索时间。" % lost_sheep_manager.last_failed_count,
+				[{"id": &"confirm", "label": "记住了"}]
 			)
 	return _event(event_id, "牧场消息", "牧场里有了新的变化。", [{"id": &"confirm", "label": "确定"}])
 

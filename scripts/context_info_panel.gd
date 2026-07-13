@@ -5,6 +5,7 @@ const PAPER_TEXTURE: Texture2D = preload("res://assets/tiny_swords/ui/bottom_too
 @onready var world_controller: Node = get_node("../..")
 @onready var player: AnimatedSprite2D = get_node("../../Island/Shepherd")
 @onready var world_camera: Camera2D = get_node("../../WorldCamera")
+@onready var routine_manager: Node = get_node("../../DayRoutineManager")
 
 var title_label: Label
 var detail_label: Label
@@ -49,19 +50,25 @@ func _refresh() -> void:
 		return
 	if current_entity is AnimatedSprite2D and current_entity.has_method("get_sheep_name"):
 		var sheep: Node = current_entity
-		title_label.text = "%s · %s" % [sheep.get_sheep_name(), sheep.get_sex_text()]
-		detail_label.text = "%d 天 · %s · 饥饿 %d%%。按住拖动可搬运，单击打开资料并修改名字。" % [
-			sheep.get_age_days(), sheep.get_health_text(), sheep.get_hunger_percent(),
+		title_label.text = "%s · %s%s" % [
+			sheep.get_sheep_name(), sheep.get_sex_text(), " · 走失" if sheep.is_lost() else "",
+		]
+		detail_label.text = "%d 天 · 第%d代 · %s · 饥饿 %d%%。按住拖动可搬运，单击打开资料并修改名字。" % [
+			sheep.get_age_days(), sheep.get_generation(), sheep.get_health_text(), sheep.get_hunger_percent(),
 		]
 		_setup_button(primary_button, "查看资料", _open_sheep_profile)
 		return
 	if current_entity is AnimatedSprite2D and current_entity.has_method("set_command_mode"):
 		var dog: AnimatedSprite2D = current_entity
 		title_label.text = "牧羊犬 %d" % (dog.dog_index + 1)
-		detail_label.text = "体力 %d%%（%s）。疲惫会降低驱赶范围和狼窝防护分；夜间回狗窝可在次日完全恢复。" % [
-			dog.get_stamina_percent(), dog.get_stamina_state_text(),
+		detail_label.text = "体力 %d%%（%s）。狼窝防护受体力影响；%s" % [
+			dog.get_stamina_percent(), dog.get_stamina_state_text(), routine_manager.get_wolf_patrol_status(),
 		]
-		_setup_button(primary_button, "镜头定位", _focus_selected)
+		if routine_manager.has_pending_wolf_tracks() and not routine_manager.wolf_patrol_active:
+			_setup_button(primary_button, "巡查狼迹", _patrol_wolf_tracks)
+			_setup_button(secondary_button, "镜头定位", _focus_selected)
+		else:
+			_setup_button(primary_button, "镜头定位", _focus_selected)
 		return
 	if current_entity is Node and current_entity.has_meta("build_item_id"):
 		var item_id: StringName = current_entity.get_meta("build_item_id", &"")
@@ -89,6 +96,12 @@ func _whistle() -> void:
 func _focus_selected() -> void:
 	if current_entity is Node2D:
 		world_camera.focus_on_world_position(current_entity.global_position)
+
+
+func _patrol_wolf_tracks() -> void:
+	if is_instance_valid(current_entity):
+		routine_manager.request_wolf_patrol(current_entity)
+		_refresh()
 
 
 func _open_sheep_profile() -> void:

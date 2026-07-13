@@ -117,8 +117,21 @@ func send_dog_to_house(building: Node2D) -> bool:
 
 
 func wake_all() -> void:
-	for dog in get_dogs():
-		dog.wake_up()
+	var houses: Array[Node2D] = build_controller.get_buildings_by_type(&"dog_house")
+	var active_dogs := get_dogs()
+	for index in active_dogs.size():
+		var level: int = build_controller.get_building_level(houses[index]) if index < houses.size() else 1
+		active_dogs[index].wake_up([25, 40, 55][level - 1])
+
+
+func get_total_night_defense_points() -> int:
+	var result := 0
+	var houses: Array[Node2D] = build_controller.get_buildings_by_type(&"dog_house")
+	var active_dogs := get_dogs()
+	for index in active_dogs.size():
+		var level: int = build_controller.get_building_level(houses[index]) if index < houses.size() else 1
+		result += active_dogs[index].get_night_defense_points() + (level - 1) * 2
+	return result
 
 
 func get_save_data() -> Array[Dictionary]:

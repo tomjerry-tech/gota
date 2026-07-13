@@ -90,10 +90,16 @@ var avoidance_switches := 0
 var age_days := 0
 var sick := false
 var medical_icon: Sprite2D
+var lost := false
+var lost_icon: Label
 var pregnant := false
 var pregnancy_days := 0
 var expected_lamb_count := 0
+var pregnancy_father_id := 0
 var breeding_cooldown_days := 0
+var mother_id := 0
+var father_id := 0
+var generation := 0
 var breeding_icon: Label
 var going_to_shelter := false
 var sheltered := false
@@ -110,6 +116,7 @@ func _ready() -> void:
 	_update_age_size()
 	_build_animations()
 	_build_medical_icon()
+	_build_lost_icon()
 	_build_breeding_icon()
 	animation_finished.connect(_on_animation_finished)
 	_start_hunger_cycle(random.randf_range(0.0, max_initial_hunger))
@@ -165,6 +172,16 @@ func get_health_text() -> String:
 	return "健康" if is_healthy() else "生病"
 
 
+func is_lost() -> bool:
+	return lost
+
+
+func set_lost(value: bool) -> void:
+	lost = value
+	if lost_icon:
+		lost_icon.visible = lost
+
+
 func is_pregnant() -> bool:
 	return pregnant
 
@@ -175,6 +192,28 @@ func get_pregnancy_days() -> int:
 
 func get_expected_lamb_count() -> int:
 	return expected_lamb_count if pregnant else 0
+
+
+func get_pregnancy_father_id() -> int:
+	return pregnancy_father_id if pregnant else 0
+
+
+func get_mother_id() -> int:
+	return mother_id
+
+
+func get_father_id() -> int:
+	return father_id
+
+
+func get_generation() -> int:
+	return generation
+
+
+func set_lineage(value_mother_id: int, value_father_id: int, value_generation: int) -> void:
+	mother_id = maxi(0, value_mother_id)
+	father_id = maxi(0, value_father_id)
+	generation = maxi(0, value_generation)
 
 
 func get_breeding_cooldown_days() -> int:
@@ -191,10 +230,15 @@ func get_save_data() -> Dictionary:
 		"sick": sick,
 		"hunger": hunger,
 		"hunger_rate": hunger_rate,
+		"lost": lost,
 		"pregnant": pregnant,
 		"pregnancy_days": pregnancy_days,
 		"expected_lamb_count": expected_lamb_count,
+		"pregnancy_father_id": pregnancy_father_id,
 		"breeding_cooldown_days": breeding_cooldown_days,
+		"mother_id": mother_id,
+		"father_id": father_id,
+		"generation": generation,
 		"going_to_shelter": going_to_shelter,
 		"sheltered": sheltered,
 		"shelter_target": [shelter_target.x, shelter_target.y],
@@ -212,13 +256,18 @@ func restore_save_data(data: Dictionary) -> void:
 	sick = bool(data.get("sick", false))
 	hunger = clampf(float(data.get("hunger", 0.0)), 0.0, 100.0)
 	hunger_rate = maxf(0.01, float(data.get("hunger_rate", 100.0 / 150.0)))
+	lost = bool(data.get("lost", false))
 	pregnant = bool(data.get("pregnant", false)) and sex == SEX_FEMALE
 	pregnancy_days = clampi(int(data.get("pregnancy_days", 0)), 0, PREGNANCY_DURATION_DAYS)
 	expected_lamb_count = (
 		clampi(int(data.get("expected_lamb_count", 1)), 1, 5)
 		if pregnant else 0
 	)
+	pregnancy_father_id = maxi(0, int(data.get("pregnancy_father_id", 0))) if pregnant else 0
 	breeding_cooldown_days = maxi(0, int(data.get("breeding_cooldown_days", 0)))
+	mother_id = maxi(0, int(data.get("mother_id", 0)))
+	father_id = maxi(0, int(data.get("father_id", 0)))
+	generation = maxi(0, int(data.get("generation", 0)))
 	var saved_shelter_target: Variant = data.get("shelter_target", [])
 	if saved_shelter_target is Array and saved_shelter_target.size() >= 2:
 		shelter_target = Vector2(float(saved_shelter_target[0]), float(saved_shelter_target[1]))
@@ -232,6 +281,8 @@ func restore_save_data(data: Dictionary) -> void:
 	_build_animations()
 	if medical_icon:
 		medical_icon.visible = sick
+	if lost_icon:
+		lost_icon.visible = lost
 	_update_breeding_icon()
 	_enter_idle()
 
@@ -243,6 +294,7 @@ func can_breed() -> bool:
 		and hunger < seek_food_hunger
 		and breeding_cooldown_days <= 0
 		and not pregnant
+		and not lost
 	)
 
 
@@ -253,6 +305,8 @@ func get_breeding_status_text() -> String:
 			PREGNANCY_DURATION_DAYS,
 			expected_lamb_count,
 		]
+	if lost:
+		return "走失中，暂不可繁育"
 	if age_days < BREEDING_AGE_DAYS:
 		return "%d 天后可繁育" % (BREEDING_AGE_DAYS - age_days)
 	if not is_healthy():
@@ -264,12 +318,13 @@ func get_breeding_status_text() -> String:
 	return "可以繁育"
 
 
-func start_pregnancy(litter_size := 1) -> bool:
+func start_pregnancy(litter_size := 1, value_father_id := 0) -> bool:
 	if sex != SEX_FEMALE or not can_breed():
 		return false
 	pregnant = true
 	pregnancy_days = 0
 	expected_lamb_count = clampi(litter_size, 1, 5)
+	pregnancy_father_id = maxi(0, value_father_id)
 	_update_breeding_icon()
 	breeding_state_changed.emit(self)
 	return true
@@ -284,6 +339,7 @@ func finish_birth() -> void:
 	pregnant = false
 	pregnancy_days = 0
 	expected_lamb_count = 0
+	pregnancy_father_id = 0
 	breeding_cooldown_days = MOTHER_COOLDOWN_DAYS
 	_update_breeding_icon()
 	breeding_state_changed.emit(self)
@@ -329,6 +385,31 @@ func _build_medical_icon() -> void:
 	medical_icon.z_index = 20
 	medical_icon.visible = sick
 	add_child(medical_icon)
+
+
+func _build_lost_icon() -> void:
+	lost_icon = Label.new()
+	lost_icon.name = "LostStatusIcon"
+	lost_icon.position = Vector2(-40.0, -72.0)
+	lost_icon.size = Vector2(32.0, 32.0)
+	lost_icon.text = "!"
+	lost_icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lost_icon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lost_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lost_icon.z_index = 22
+	lost_icon.add_theme_font_size_override("font_size", 22)
+	lost_icon.add_theme_color_override("font_color", Color("fff4c4"))
+	lost_icon.add_theme_color_override("font_shadow_color", Color("633f24"))
+	lost_icon.add_theme_constant_override("shadow_offset_x", 1)
+	lost_icon.add_theme_constant_override("shadow_offset_y", 2)
+	var lost_style := StyleBoxFlat.new()
+	lost_style.bg_color = Color("b5523f")
+	lost_style.border_color = Color("ffd45c")
+	lost_style.set_border_width_all(2)
+	lost_style.set_corner_radius_all(16)
+	lost_icon.add_theme_stylebox_override("normal", lost_style)
+	lost_icon.visible = lost
+	add_child(lost_icon)
 
 
 func _build_breeding_icon() -> void:

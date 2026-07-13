@@ -46,6 +46,7 @@
 [ext_resource type="Script" path="res://scripts/day_routine_manager.gd" id="44_day_routine_manager"]
 [ext_resource type="Script" path="res://scripts/daily_guide_panel.gd" id="45_daily_guide_panel"]
 [ext_resource type="Script" path="res://scripts/building_interaction_panel.gd" id="46_building_interaction_panel"]
+[ext_resource type="Script" path="res://scripts/lost_sheep_manager.gd" id="47_lost_sheep_manager"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cliff"]
 atlas = ExtResource("1_tilemap")
@@ -327,6 +328,9 @@ script = ExtResource("42_dog_manager")
 
 [node name="DayRoutineManager" type="Node" parent="."]
 script = ExtResource("44_day_routine_manager")
+
+[node name="LostSheepManager" type="Node" parent="."]
+script = ExtResource("47_lost_sheep_manager")
 
 [node name="DailyTaskManager" type="Node" parent="."]
 script = ExtResource("32_daily_task_manager")
@@ -652,7 +656,7 @@ anchors_preset = 0
 offset_left = 24.0
 offset_top = 232.0
 offset_right = 364.0
-offset_bottom = 472.0
+offset_bottom = 532.0
 mouse_filter = 1
 script = ExtResource("46_building_interaction_panel")
 

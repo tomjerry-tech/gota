@@ -397,9 +397,9 @@ func _refresh_market_page(force := false) -> void:
 	for order in market_manager.get_orders():
 		signature_parts.append("%s:%s" % [order.id, order.status])
 	for sheep in world_controller.sheep_group.get_children():
-		signature_parts.append("%d:%d:%s:%s:%s" % [
-			sheep.get_sheep_id(), sheep.get_age_days(), sheep.get_sex(),
-			str(sheep.is_healthy()), str(sheep.is_pregnant()),
+		signature_parts.append("%d:%d:%d:%s:%s:%s:%s" % [
+			sheep.get_sheep_id(), sheep.get_age_days(), sheep.get_generation(), sheep.get_sex(),
+			str(sheep.is_healthy()), str(sheep.is_pregnant()), str(sheep.is_lost()),
 		])
 	var signature := "|".join(signature_parts)
 	if not force and signature == market_signature:
@@ -632,10 +632,10 @@ func _refresh_breeding_options(force := false) -> void:
 		return
 	var signature_parts: Array[String] = []
 	for sheep in world_controller.sheep_group.get_children():
-		signature_parts.append("%d:%s:%d:%s:%d:%d:%s:%s" % [
-			sheep.get_instance_id(), sheep.get_sheep_name(), sheep.get_age_days(), sheep.get_sex(),
+		signature_parts.append("%d:%s:%d:%d:%s:%d:%d:%s:%s:%s" % [
+			sheep.get_instance_id(), sheep.get_sheep_name(), sheep.get_age_days(), sheep.get_generation(), sheep.get_sex(),
 			sheep.get_hunger_percent(), sheep.get_breeding_cooldown_days(),
-			str(sheep.is_healthy()), str(sheep.is_pregnant()),
+			str(sheep.is_healthy()), str(sheep.is_pregnant()), str(sheep.is_lost()),
 		])
 	var new_signature := "|".join(signature_parts)
 	if not force and new_signature == breeding_signature:
