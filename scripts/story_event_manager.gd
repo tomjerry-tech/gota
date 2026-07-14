@@ -54,6 +54,7 @@ func _ready() -> void:
 	progression_manager.chapter_completed.connect(_on_chapter_completed)
 	progression_manager.achievement_unlocked.connect(_on_achievement_unlocked)
 	world_controller.lamb_born.connect(_on_lineage_lamb_born)
+	world_controller.sheep_died.connect(_on_sheep_died)
 	day_routine_manager.wolf_den_discovered.connect(_on_wolf_den_discovered)
 	day_routine_manager.wolf_tracks_appeared.connect(_on_wolf_tracks_appeared)
 	day_routine_manager.wolf_patrol_completed.connect(_on_wolf_patrol_completed)
@@ -222,6 +223,10 @@ func _on_lineage_lamb_born(lamb: Node, _mother: Node) -> void:
 		queue_event(&"first_lineage_lamb")
 
 
+func _on_sheep_died(_sheep: Node) -> void:
+	queue_event(&"first_sheep_death")
+
+
 func _on_wolf_den_discovered() -> void:
 	queue_event(&"wolf_den_discovered")
 
@@ -351,6 +356,12 @@ func _build_event_data(event_id: StringName) -> Dictionary:
 			)
 			data.target = day_four_target
 			return data
+		&"first_sheep_death":
+			return _event(
+				event_id, "迟到的治疗",
+				"一只病羊连续两天没有接受治疗，已经没能活下来。\n今后看到医疗图标时，应在下一个清晨前准备药物，医疗页会显示剩余期限。",
+				[{"id": &"open_medical", "label": "打开医疗"}, {"id": &"confirm", "label": "记住了"}]
+			)
 		&"day_8_commission":
 			var succeeded: bool = newbie_commission.finished and newbie_commission.succeeded
 			return _event(

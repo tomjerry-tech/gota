@@ -21,6 +21,7 @@ var born_today := 0
 var normal_sale_income_today := 0
 var order_income_today := 0
 var expired_orders_today := 0
+var deaths_today := 0
 
 
 func _ready() -> void:
@@ -30,6 +31,7 @@ func _ready() -> void:
 	world_controller.sheep_added.connect(_on_sheep_added)
 	world_controller.sheep_sold.connect(_on_sheep_sold)
 	world_controller.lamb_born.connect(_on_lamb_born)
+	world_controller.sheep_died.connect(_on_sheep_died)
 	market_manager.normal_sale_completed.connect(_on_normal_sale_completed)
 	market_manager.order_completed.connect(_on_order_completed)
 	market_manager.order_expired.connect(_on_order_expired)
@@ -51,6 +53,7 @@ func get_save_data() -> Dictionary:
 		"normal_sale_income_today": normal_sale_income_today,
 		"order_income_today": order_income_today,
 		"expired_orders_today": expired_orders_today,
+		"deaths_today": deaths_today,
 	}
 
 
@@ -61,6 +64,7 @@ func restore_save_data(data: Dictionary) -> void:
 	normal_sale_income_today = maxi(0, int(data.get("normal_sale_income_today", 0)))
 	order_income_today = maxi(0, int(data.get("order_income_today", 0)))
 	expired_orders_today = maxi(0, int(data.get("expired_orders_today", 0)))
+	deaths_today = maxi(0, int(data.get("deaths_today", 0)))
 	hide()
 
 
@@ -74,6 +78,10 @@ func _on_sheep_sold(count: int) -> void:
 
 func _on_lamb_born(_lamb: Node, _mother: Node) -> void:
 	born_today += 1
+
+
+func _on_sheep_died(_sheep: Node) -> void:
+	deaths_today += 1
 
 
 func _on_normal_sale_completed(_count: int, income: int) -> void:
@@ -107,19 +115,24 @@ func show_daily_report(ended_day: int) -> void:
 	var sick_count: int = world_controller.get_sick_sheep_count()
 	if sick_count > 0:
 		risks.append("%d 只羊生病" % sick_count)
+	if deaths_today > 0:
+		risks.append("%d 只羊因连续两天未治疗而死亡" % deaths_today)
 	if world_controller.get_lamb_count() > 0 and not world_controller.has_building(&"lamb_shelter"):
 		risks.append("幼羊没有小羊棚保护")
 	match String(wolf_risk.get("outcome", "inactive")):
 		"warning":
 			risks.append("狼窝靠近，羊群受到惊吓")
 		"breach":
-			risks.append("狼窝骚扰造成羊走散和金币损失")
+			risks.append(
+				"狼窝骚扰造成羊走散和金币损失"
+				if int(wolf_risk.get("money_loss", 0)) > 0 else "可见狼群追散了未受保护的羊"
+			)
 	if risks.is_empty():
 		risks.append("暂无明显风险")
 	report_title.text = "第 %d 天结算" % ended_day
 	report_text.text = (
 		"牧场成长　Lv.%d　%s　%s\n"
-		+ "羊群变化　买入 %d　出生 %d　出售 %d　当前 %d / 容量 %d\n"
+		+ "羊群变化　买入 %d　出生 %d　出售 %d　死亡 %d　当前 %d / 容量 %d\n"
 		+ "草场情况　成熟 %d / 总数 %d\n"
 		+ "收入支出　收入 %d　支出 %d　净变化 %+d\n"
 		+ "市场明细　普通出售 %d　订单交付 %d　过期订单 %d\n"
@@ -128,7 +141,7 @@ func show_daily_report(ended_day: int) -> void:
 		+ "风险提醒　%s"
 	) % [
 		progression_manager.get_level(), progression_manager.get_level_progress_text(), progression_manager.get_chapter_title(),
-		bought_today, born_today, sold_today, sheep_count, capacity,
+		bought_today, born_today, sold_today, deaths_today, sheep_count, capacity,
 		mature_grass, total_grass,
 		finance.income, finance.expense, finance.income - finance.expense,
 		normal_sale_income_today, order_income_today, expired_orders_today,
@@ -142,6 +155,7 @@ func show_daily_report(ended_day: int) -> void:
 	normal_sale_income_today = 0
 	order_income_today = 0
 	expired_orders_today = 0
+	deaths_today = 0
 	show()
 	time_controls.pause_for_report()
 

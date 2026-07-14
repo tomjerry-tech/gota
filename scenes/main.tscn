@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" path="res://assets/tiny_swords/ui/bottom_toolbar/build.png" id="18_build_icon"]
 [ext_resource type="Texture2D" path="res://assets/tiny_swords/ui/bottom_toolbar/sheep.png" id="19_toolbar_sheep"]
 [ext_resource type="Texture2D" path="res://assets/tiny_swords/ui/bottom_toolbar/medical.png" id="20_medical_icon"]
+[ext_resource type="Texture2D" path="res://assets/tiny_swords/ui/bottom_toolbar/help.png" id="49_help_icon"]
 [ext_resource type="Script" path="res://scripts/bottom_toolbar.gd" id="21_bottom_toolbar"]
 [ext_resource type="Script" path="res://scripts/build_menu.gd" id="22_build_menu"]
 [ext_resource type="Script" path="res://scripts/build_controller.gd" id="23_build_controller"]
@@ -42,12 +43,13 @@
 [ext_resource type="Script" path="res://scripts/dog_command_bar.gd" id="40_dog_command_bar"]
 [ext_resource type="Script" path="res://scripts/market_order_manager.gd" id="41_market_order_manager"]
 [ext_resource type="Script" path="res://scripts/dog_manager.gd" id="42_dog_manager"]
-[ext_resource type="Script" path="res://scripts/context_info_panel.gd" id="43_context_info_panel"]
+[ext_resource type="Script" path="res://scripts/help_menu.gd" id="43_help_menu"]
 [ext_resource type="Script" path="res://scripts/day_routine_manager.gd" id="44_day_routine_manager"]
 [ext_resource type="Script" path="res://scripts/daily_guide_panel.gd" id="45_daily_guide_panel"]
 [ext_resource type="Script" path="res://scripts/building_interaction_panel.gd" id="46_building_interaction_panel"]
 [ext_resource type="Script" path="res://scripts/lost_sheep_manager.gd" id="47_lost_sheep_manager"]
 [ext_resource type="Script" path="res://scripts/pasture_progression_manager.gd" id="48_pasture_progression"]
+[ext_resource type="Script" path="res://scripts/wolf_manager.gd" id="50_wolf_manager"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cliff"]
 atlas = ExtResource("1_tilemap")
@@ -330,6 +332,9 @@ script = ExtResource("42_dog_manager")
 [node name="DayRoutineManager" type="Node" parent="."]
 script = ExtResource("44_day_routine_manager")
 
+[node name="WolfManager" type="Node" parent="."]
+script = ExtResource("50_wolf_manager")
+
 [node name="LostSheepManager" type="Node" parent="."]
 script = ExtResource("47_lost_sheep_manager")
 
@@ -483,7 +488,7 @@ anchor_right = 1.0
 offset_left = -746.0
 offset_top = 78.0
 offset_right = -426.0
-offset_bottom = 158.0
+offset_bottom = 174.0
 grow_horizontal = 0
 mouse_filter = 2
 script = ExtResource("45_daily_guide_panel")
@@ -512,32 +517,16 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -300.0
+offset_left = -390.0
 offset_top = -240.0
-offset_right = 300.0
+offset_right = 390.0
 offset_bottom = -140.0
 grow_horizontal = 2
 grow_vertical = 0
-pivot_offset = Vector2(300, 50)
+pivot_offset = Vector2(390, 50)
 scale = Vector2(0.5, 0.5)
 mouse_filter = 1
 script = ExtResource("40_dog_command_bar")
-
-[node name="ContextInfoPanel" type="Control" parent="HUD"]
-layout_mode = 3
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -390.0
-offset_top = -160.0
-offset_right = 390.0
-offset_bottom = -96.0
-grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 1
-script = ExtResource("43_context_info_panel")
 
 [node name="BottomToolbar" type="Control" parent="HUD"]
 layout_mode = 3
@@ -546,13 +535,13 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -220.0
+offset_left = -260.0
 offset_top = -112.0
-offset_right = 220.0
+offset_right = 260.0
 offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 0
-pivot_offset = Vector2(220, 50)
+pivot_offset = Vector2(260, 50)
 scale = Vector2(0.5, 0.5)
 mouse_filter = 1
 script = ExtResource("21_bottom_toolbar")
@@ -571,9 +560,9 @@ stretch_mode = 5
 
 [node name="BuildButton" type="TextureButton" parent="HUD/BottomToolbar/Paper"]
 layout_mode = 0
-offset_left = 85.0
+offset_left = 65.0
 offset_top = 20.0
-offset_right = 149.0
+offset_right = 129.0
 offset_bottom = 84.0
 tooltip_text = "建造"
 mouse_default_cursor_shape = 2
@@ -583,9 +572,9 @@ stretch_mode = 5
 
 [node name="SheepButton" type="TextureButton" parent="HUD/BottomToolbar/Paper"]
 layout_mode = 0
-offset_left = 188.0
+offset_left = 174.0
 offset_top = 20.0
-offset_right = 252.0
+offset_right = 238.0
 offset_bottom = 84.0
 tooltip_text = "羊群"
 mouse_default_cursor_shape = 2
@@ -595,13 +584,25 @@ stretch_mode = 5
 
 [node name="MedicalButton" type="TextureButton" parent="HUD/BottomToolbar/Paper"]
 layout_mode = 0
-offset_left = 291.0
+offset_left = 283.0
 offset_top = 20.0
-offset_right = 355.0
+offset_right = 347.0
 offset_bottom = 84.0
 tooltip_text = "医疗"
 mouse_default_cursor_shape = 2
 texture_normal = ExtResource("20_medical_icon")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="HelpButton" type="TextureButton" parent="HUD/BottomToolbar/Paper"]
+layout_mode = 0
+offset_left = 392.0
+offset_top = 20.0
+offset_right = 456.0
+offset_bottom = 84.0
+tooltip_text = "牧场手册"
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("49_help_icon")
 ignore_texture_size = true
 stretch_mode = 5
 
@@ -652,6 +653,18 @@ offset_bottom = 626.0
 scale = Vector2(0.5, 0.5)
 mouse_filter = 1
 script = ExtResource("31_medical_menu")
+
+[node name="HelpMenu" type="Control" parent="HUD"]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 196.0
+offset_right = 624.0
+offset_bottom = 876.0
+scale = Vector2(0.5, 0.5)
+mouse_filter = 1
+script = ExtResource("43_help_menu")
 
 [node name="BuildingInteractionPanel" type="Control" parent="HUD"]
 visible = false

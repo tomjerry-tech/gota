@@ -29,6 +29,7 @@ var refresh_time := 0.0
 func _ready() -> void:
 	day_routine_manager.sheep_scattered.connect(_on_sheep_scattered)
 	top_hud.day_changed.connect(_on_day_changed)
+	world_controller.sheep_died.connect(_on_sheep_died)
 
 
 func _process(delta: float) -> void:
@@ -157,6 +158,17 @@ func _on_sheep_scattered(sheep_list: Array, ended_day: int) -> void:
 func _on_day_changed(new_day: int) -> void:
 	if active and new_day > deadline_day:
 		_fail_rescue()
+
+
+func _on_sheep_died(sheep: Node) -> void:
+	if not active or not lost_sheep_ids.has(sheep.get_sheep_id()):
+		return
+	lost_sheep_ids.erase(sheep.get_sheep_id())
+	last_failed_count += 1
+	mission_changed.emit()
+	if lost_sheep_ids.is_empty():
+		active = false
+		mission_failed.emit(last_failed_count)
 
 
 func _check_rescue_progress() -> void:

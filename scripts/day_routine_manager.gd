@@ -23,6 +23,7 @@ const WOLF_DEN_TEXTURE: Texture2D = preload("res://assets/tiny_swords/wolf/wolf_
 @onready var dog_manager: Node = get_node("../DogManager")
 @onready var roundup_manager: Control = get_node("../HUD/RoundupStatus")
 @onready var decorations: Node2D = get_node("../Island/Decorations")
+@onready var daily_task_manager: Node = get_node("../DailyTaskManager")
 
 var auto_roundup_day := 0
 var gates_closed_day := 0
@@ -39,6 +40,11 @@ var wolf_patrol_bonus_day := 0
 var wolf_patrol_active := false
 var wolf_patrol_dog_index := -1
 var wolf_tracks_node: Node2D
+var manual_roundup_fence: Node2D
+var manual_roundup_dog: AnimatedSprite2D
+var manual_roundup_target_count := 0
+var visible_wolf_captures_day := 0
+var visible_wolf_captured_ids: Array[int] = []
 var last_guidance_key := ""
 var refresh_time := 0.0
 
@@ -46,7 +52,7 @@ var refresh_time := 0.0
 func _ready() -> void:
 	top_hud.day_changed.connect(_on_day_changed)
 	build_controller.land_expanded.connect(_try_discover_wolf_den)
-	_refresh_guidance()
+	call_deferred("_refresh_guidance")
 	call_deferred("_try_discover_wolf_den")
 
 
@@ -59,6 +65,7 @@ func _process(delta: float) -> void:
 	_try_close_gates_at_night()
 	_try_discover_wolf_den()
 	_update_wolf_patrol()
+	_update_manual_dog_roundup()
 	_refresh_guidance()
 
 
@@ -77,6 +84,12 @@ func get_save_data() -> Dictionary:
 		"wolf_patrol_bonus_day": wolf_patrol_bonus_day,
 		"wolf_patrol_active": wolf_patrol_active,
 		"wolf_patrol_dog_index": wolf_patrol_dog_index,
+		"manual_roundup_day": top_hud.get_day() if is_instance_valid(manual_roundup_fence) else 0,
+		"manual_roundup_fence_index": build_controller.get_fence_roots().find(manual_roundup_fence),
+		"manual_roundup_dog_index": manual_roundup_dog.dog_index if is_instance_valid(manual_roundup_dog) else -1,
+		"manual_roundup_target_count": manual_roundup_target_count,
+		"visible_wolf_captures_day": visible_wolf_captures_day,
+		"visible_wolf_captured_ids": visible_wolf_captured_ids.duplicate(),
 	}
 
 
@@ -111,6 +124,25 @@ func restore_save_data(data: Dictionary) -> void:
 	if wolf_patrol_active and not is_instance_valid(_get_patrol_dog()):
 		wolf_patrol_active = false
 		wolf_patrol_dog_index = -1
+	var saved_roundup_day := int(data.get("manual_roundup_day", 0))
+	var saved_fence_index := int(data.get("manual_roundup_fence_index", -1))
+	var saved_dog_index := int(data.get("manual_roundup_dog_index", -1))
+	var fences: Array[Node2D] = build_controller.get_fence_roots()
+	var dogs: Array[AnimatedSprite2D] = dog_manager.get_dogs()
+	if (
+		saved_roundup_day == top_hud.get_day()
+		and saved_fence_index >= 0 and saved_fence_index < fences.size()
+		and saved_dog_index >= 0 and saved_dog_index < dogs.size()
+	):
+		manual_roundup_fence = fences[saved_fence_index]
+		manual_roundup_dog = dogs[saved_dog_index]
+		manual_roundup_target_count = maxi(1, int(data.get("manual_roundup_target_count", world_controller.get_sheep_count())))
+	visible_wolf_captures_day = maxi(0, int(data.get("visible_wolf_captures_day", 0)))
+	visible_wolf_captured_ids.clear()
+	var saved_capture_ids: Variant = data.get("visible_wolf_captured_ids", [])
+	if saved_capture_ids is Array:
+		for value in saved_capture_ids:
+			visible_wolf_captured_ids.append(int(value))
 	last_guidance_key = ""
 	_refresh_guidance()
 
@@ -118,9 +150,10 @@ func restore_save_data(data: Dictionary) -> void:
 func assign_building_rest(building: Node2D) -> Dictionary:
 	if not is_instance_valid(building) or not top_hud.is_night():
 		return {"success": false, "message": "只有夜间才能安排角色进屋休息"}
+	var entrance: Vector2 = build_controller.get_building_entrance_position(building)
 	match building.get_meta("build_item_id", &""):
 		&"shepherd_house":
-			if player.send_to_rest(building.global_position):
+			if player.send_to_rest(entrance):
 				return {"success": true, "message": "牧羊人正在前往小屋，完成休息后次日恢复满体力"}
 		&"dog_house":
 			if dog_manager.send_dog_to_house(building):
@@ -128,7 +161,7 @@ func assign_building_rest(building: Node2D) -> Dictionary:
 		&"lamb_shelter":
 			var assigned := 0
 			for sheep in world_controller.sheep_group.get_children():
-				if not sheep.is_adult() and sheep.send_to_shelter(building.global_position + Vector2(0.0, 48.0)):
+				if not sheep.is_adult() and sheep.send_to_shelter(entrance):
 					assigned += 1
 			if assigned > 0:
 				return {"success": true, "message": "已安排 %d 只幼羊进入小羊棚" % assigned}
@@ -145,6 +178,11 @@ func _on_day_changed(_new_day: int) -> void:
 		sheep.wake_from_shelter()
 	player.stop_auto_roundup()
 	dog_manager.stop_auto_roundup()
+	manual_roundup_fence = null
+	manual_roundup_dog = null
+	manual_roundup_target_count = 0
+	visible_wolf_captures_day = 0
+	visible_wolf_captured_ids.clear()
 	last_guidance_key = ""
 	_try_discover_wolf_den()
 	_prepare_daily_wolf_tracks(_new_day)
@@ -169,14 +207,18 @@ func evaluate_wolf_night_risk(ended_day: int) -> Dictionary:
 	result.frightened_count = 0
 	result.strayed_count = 0
 	result.money_loss = 0
-	if int(defense.score) >= WOLF_SAFE_SCORE:
+	result.visible_capture_count = visible_wolf_captured_ids.size() if visible_wolf_captures_day == ended_day else 0
+	if int(result.visible_capture_count) > 0 and int(defense.score) >= WOLF_WARNING_SCORE:
+		result.outcome = "breach"
+		result.frightened_count = int(result.visible_capture_count)
+	elif int(defense.score) >= WOLF_SAFE_SCORE:
 		result.outcome = "safe"
 	elif int(defense.score) >= WOLF_WARNING_SCORE:
 		result.outcome = "warning"
 		result.frightened_count = _frighten_sheep(1)
 	else:
 		result.outcome = "breach"
-		var stray_target := 1 if int(defense.score) >= 25 else 2
+		var stray_target := maxi(0, (1 if int(defense.score) >= 25 else 2) - int(result.visible_capture_count))
 		var scattered_sheep: Array[Node] = _scatter_unsecured_sheep(stray_target, ended_day)
 		result.strayed_count = scattered_sheep.size()
 		result.frightened_count = result.strayed_count
@@ -198,13 +240,16 @@ func get_wolf_defense_preview(for_day := 0) -> Dictionary:
 		if _is_sheep_secured(sheep):
 			secured_count += 1
 	var fences: Array[Node2D] = build_controller.get_fence_roots()
-	var closed_gates := fences.filter(
-		func(fence: Node2D) -> bool: return not bool(fence.get_meta("gate_open", false))
-	).size()
+	var gate_count := 0
+	var closed_gates := 0
+	for fence in fences:
+		var states: Array[bool] = build_controller.get_fence_gate_states(fence)
+		gate_count += states.size()
+		closed_gates += states.count(false)
 	var dogs: Array[AnimatedSprite2D] = dog_manager.get_dogs()
 	var dog_count := dogs.size()
 	var secured_score := roundi(60.0 * float(secured_count) / float(maxi(1, sheep_count)))
-	var gate_score := roundi(20.0 * float(closed_gates) / float(fences.size())) if not fences.is_empty() else 0
+	var gate_score := roundi(20.0 * float(closed_gates) / float(gate_count)) if gate_count > 0 else 0
 	var dog_score := mini(20, dog_manager.get_total_night_defense_points())
 	var patrol_score := WOLF_PATROL_DEFENSE_BONUS if wolf_patrol_bonus_day == defense_day else 0
 	var fence_upgrade_score: int = build_controller.get_fence_upgrade_defense_points()
@@ -217,7 +262,7 @@ func get_wolf_defense_preview(for_day := 0) -> Dictionary:
 		"secured_count": secured_count,
 		"sheep_count": sheep_count,
 		"closed_gates": closed_gates,
-		"gate_count": fences.size(),
+		"gate_count": gate_count,
 		"dog_count": dog_count,
 		"dog_score": dog_score,
 		"patrol_score": patrol_score,
@@ -260,8 +305,9 @@ func get_wolf_risk_report_text(ended_day: int) -> String:
 		"warning":
 			return "有狼靠近，%d 只羊受惊；%s" % [int(result.get("frightened_count", 0)), defense_text]
 		"breach":
-			return "外围受扰，%d 只羊走散，损失 %d 金币；%s" % [
+			return "外围受扰，%d 只羊走散，可见狼追散 %d 只，损失 %d 金币；%s" % [
 				int(result.get("strayed_count", 0)),
+				int(result.get("visible_capture_count", 0)),
 				int(result.get("money_loss", 0)),
 				defense_text,
 			]
@@ -278,6 +324,35 @@ func _is_sheep_secured(sheep: Node) -> bool:
 		):
 			return true
 	return false
+
+
+func is_sheep_secured(sheep: Node) -> bool:
+	return _is_sheep_secured(sheep)
+
+
+func get_unsecured_sheep() -> Array[Node]:
+	return _get_unsecured_sheep()
+
+
+func register_visible_wolf_capture(sheep: Node) -> bool:
+	if (
+		not is_instance_valid(sheep)
+		or sheep.is_queued_for_deletion()
+		or _is_sheep_secured(sheep)
+		or visible_wolf_captured_ids.has(sheep.get_sheep_id())
+	):
+		return false
+	visible_wolf_captures_day = top_hud.get_day()
+	visible_wolf_captured_ids.append(sheep.get_sheep_id())
+	var random := RandomNumberGenerator.new()
+	random.seed = top_hud.get_day() * 8191 + sheep.get_sheep_id() * 131
+	var escape_position: Variant = _find_unfenced_land_position(random)
+	if escape_position is Vector2:
+		sheep.global_position = escape_position as Vector2
+	if sheep.has_method("scare"):
+		sheep.scare(wolf_den_position)
+	sheep_scattered.emit([sheep], top_hud.get_day())
+	return true
 
 
 func _frighten_sheep(target_count: int) -> int:
@@ -511,6 +586,72 @@ func _try_start_auto_roundup() -> void:
 	auto_roundup_day = top_hud.get_day()
 
 
+func request_dog_roundup(dog: Variant) -> Dictionary:
+	if not top_hud.is_night():
+		return {"success": false, "message": "夜间才能使用一键回圈"}
+	if not is_instance_valid(dog) or dog not in dog_manager.get_dogs():
+		return {"success": false, "message": "请先选中一只牧羊犬"}
+	var fence := _choose_roundup_fence(dog.global_position)
+	if not fence:
+		return {"success": false, "message": "请先建造一圈木围栏"}
+	var target_count := _get_roundup_eligible_sheep_count()
+	if target_count <= 0:
+		return {"success": false, "message": "当前没有需要回圈的羊"}
+	_cancel_wolf_patrol()
+	manual_roundup_fence = fence
+	manual_roundup_dog = dog
+	manual_roundup_target_count = target_count
+	build_controller.set_gate_open(fence, true, true)
+	dog.set_command_mode(dog.CommandMode.DRIVE)
+	dog.set_command_target((fence.get_meta("grazing_rect") as Rect2).get_center())
+	auto_roundup_day = top_hud.get_day()
+	return {"success": true, "message": "牧羊犬正在把羊群赶入最近的围栏"}
+
+
+func is_manual_dog_roundup_active() -> bool:
+	return is_instance_valid(manual_roundup_fence) and is_instance_valid(manual_roundup_dog)
+
+
+func _choose_roundup_fence(from_position: Vector2) -> Node2D:
+	var best: Node2D
+	var best_count := -1
+	var best_distance := INF
+	for fence in build_controller.get_fence_roots():
+		var count: int = build_controller.get_fence_sheep_count(fence)
+		var center: Vector2 = (fence.get_meta("grazing_rect") as Rect2).get_center()
+		var distance := center.distance_squared_to(from_position)
+		if count > best_count or (count == best_count and distance < best_distance):
+			best = fence
+			best_count = count
+			best_distance = distance
+	return best
+
+
+func _update_manual_dog_roundup() -> void:
+	if not is_manual_dog_roundup_active():
+		return
+	if not top_hud.is_night():
+		manual_roundup_fence = null
+		manual_roundup_dog = null
+		manual_roundup_target_count = 0
+		return
+	manual_roundup_target_count = mini(manual_roundup_target_count, _get_roundup_eligible_sheep_count())
+	if build_controller.get_fence_sheep_count(manual_roundup_fence) < manual_roundup_target_count:
+		return
+	build_controller.set_gate_open(manual_roundup_fence, false, true)
+	manual_roundup_dog.set_command_mode(manual_roundup_dog.CommandMode.FOLLOW, false)
+	gates_closed_day = top_hud.get_day()
+	manual_roundup_fence = null
+	manual_roundup_dog = null
+	manual_roundup_target_count = 0
+
+
+func _get_roundup_eligible_sheep_count() -> int:
+	return world_controller.sheep_group.get_children().filter(
+		func(sheep: Node) -> bool: return not sheep.is_lost() and not bool(sheep.get("sheltered"))
+	).size()
+
+
 func _get_auto_roundup_progress() -> float:
 	var level := maxi(1, build_controller.get_highest_building_level(&"shepherd_house"))
 	return AUTO_ROUNDUP_PROGRESS - float(level - 1) * 0.04
@@ -586,44 +727,73 @@ func _spawn_wolf_den() -> void:
 
 
 func _refresh_guidance() -> void:
+	if not world_controller.is_node_ready():
+		return
 	var title := ""
 	var body := ""
 	var urgent := false
-	if wolf_patrol_active:
+	var sick_count: int = world_controller.get_sick_sheep_count()
+	var mature_grass: int = world_controller.get_mature_grass_count()
+	var sheep_count: int = world_controller.get_sheep_count()
+	var unsecured_count: int = _get_unsecured_sheep().size() if wolf_den_found else 0
+	var open_gate_count := 0
+	for fence in build_controller.get_fence_roots():
+		open_gate_count += build_controller.get_fence_gate_states(fence).count(true)
+	if sick_count > 0:
+		title = "今日优先：治疗病羊"
+		body = "现在有 %d 只病羊；打开医疗页购买药物并治疗。下一步：检查成熟草和今日任务。" % sick_count
+		urgent = true
+	elif daily_task_manager.has_claimable_reward():
+		title = "今日任务可领奖"
+		body = "现在：已有任务完成待领取。下一步：领奖后继续剩余任务，奖励不会保留到明天。"
+		urgent = true
+	elif wolf_patrol_active:
 		title = "牧羊犬巡查"
-		body = "牧羊犬正在前往外围狼迹；抵达后今晚防护增加 %d 分。" % WOLF_PATROL_DEFENSE_BONUS
+		body = "现在：牧羊犬正前往狼迹。下一步：抵达后今晚防护增加 %d 分。" % WOLF_PATROL_DEFENSE_BONUS
 		urgent = true
 	elif has_pending_wolf_tracks() and not top_hud.is_night():
-		title = "外围狼迹"
+		title = "今日优先：巡查狼迹"
 		body = (
-			"选中一只牧羊犬，在底部信息栏点击“巡查狼迹”。"
-			if dog_manager.has_active_dog() else "外围有新鲜脚印；建造牧羊犬小屋后才能提前巡查。"
+			"现在：选中牧羊犬并点击“巡查狼迹”。下一步：傍晚把羊赶入围栏。"
+			if dog_manager.has_active_dog() else "现在：外围有新鲜脚印。下一步：建造狗窝，牧羊犬才能提前巡查。"
 		)
+		urgent = true
+	elif top_hud.get_day_phase() in [&"dusk", &"night"] and unsecured_count > 0:
+		title = "当前时刻：羊群未回圈"
+		body = "现在有 %d 只羊未受关闭围栏保护，%d 扇门仍开着。下一步：选中牧羊犬点击“回圈”。" % [
+			unsecured_count, open_gate_count,
+		]
+		urgent = true
+	elif mature_grass < sheep_count:
+		title = "今日优先：草量不足"
+		body = "现在只有 %d 株成熟草供 %d 只羊进食。下一步：扩充放牧草地或暂缓买羊。" % [
+			mature_grass, sheep_count,
+		]
 		urgent = true
 	else:
 		match top_hud.get_day_phase():
 			&"morning":
-				title = "清晨照料"
-				body = "检查病羊和草量，再决定今天购买、出售或扩建什么。"
+				title = "当前时刻：清晨照料"
+				body = "现在：接取今天的 2 项任务并检查羊群。接下来：白天安排买卖、治疗或建造。"
 			&"day":
-				title = "白天经营"
-				body = "完成今日 2 项任务；奖励会随日期和难度逐步提高。"
+				title = "当前时刻：白天经营"
+				body = "现在：推进今日任务和牧场建设。接下来：傍晚前确认围栏与犬只体力。"
 			&"dusk":
-				title = "傍晚回圈"
+				title = "当前时刻：傍晚回圈"
 				urgent = true
 				body = (
-					"牧羊人与牧羊犬正在协助把羊赶入围栏。"
-					if auto_roundup_day == top_hud.get_day()
-					else "建好围栏和狗窝后，牧羊人与牧羊犬会在傍晚协助回圈。"
+					"现在：牧羊人与牧羊犬正在协助回圈。接下来：入夜后确认四扇门关闭。"
+					if auto_roundup_day == top_hud.get_day() else
+					"现在：把羊赶入同一围栏。接下来：入夜前关闭四扇门。"
 				)
 			&"night":
-				title = "夜间安置"
+				title = "当前时刻：夜间安置"
 				urgent = wolf_den_found
 				body = (
-					"威胁 Lv.%d，当前防护 %d。赶羊入圈、关门并保持犬只体力。" % [
-						get_wolf_threat_level(), int(get_wolf_defense_preview().score),
+					"现在：威胁 Lv.%d，防护 %d，开放门 %d 扇。接下来：安排牧人和犬只进屋休息。" % [
+						get_wolf_threat_level(), int(get_wolf_defense_preview().score), open_gate_count,
 					]
-					if wolf_den_found else "点击小屋安排牧羊人、牧羊犬或幼羊进屋休息。"
+					if wolf_den_found else "现在：点击小屋安排牧羊人与犬只休息。接下来：清晨检查羊群状态。"
 				)
 	var key := "%s|%s|%s" % [title, body, str(urgent)]
 	if key == last_guidance_key:

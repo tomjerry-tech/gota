@@ -419,7 +419,6 @@ def make_ui_click() -> None:
 
 def make_sfx() -> None:
     write_wav("whistle.wav", render_tone(0.78, lambda t: 1120 + 680 * math.sin(min(1.0, t / 0.55) * math.pi), 0.34, "sine"))
-    write_wav("sheep_bleat.wav", render_tone(0.68, lambda t: 245 + 34 * math.sin(t * 54) - 55 * t, 0.30, "triangle"))
 
     random.seed(931)
     bark: list[float] = []
@@ -466,8 +465,7 @@ def make_sfx() -> None:
 
 def main() -> None:
     make_music()
-    make_ambience("ambience_day.wav", False)
-    make_ambience("ambience_night.wav", True)
+    # Ambience and sheep bleats are licensed recordings; see assets/audio/SOURCES.md.
     make_sfx()
 
 

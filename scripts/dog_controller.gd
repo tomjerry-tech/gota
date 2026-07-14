@@ -22,6 +22,7 @@ const GUARD_TEXTURE: Texture2D = preload("res://assets/tiny_swords/dog/dog_guard
 const MAX_STAMINA := 100.0
 const LOW_STAMINA_THRESHOLD := 25.0
 const DAWN_RECOVERY := 25.0
+const DISPLAY_SCALE := Vector2(1.25, 1.25)
 
 @export_range(60.0, 180.0, 1.0) var run_speed := 105.0
 @export_range(50.0, 180.0, 1.0) var drive_radius := 108.0
@@ -50,6 +51,7 @@ var stamina := MAX_STAMINA
 
 
 func _ready() -> void:
+	scale = DISPLAY_SCALE
 	movement_shape.radius = collision_radius
 	_build_animations()
 	_build_mode_label()
@@ -118,7 +120,7 @@ func configure(index: int, home_position: Vector2) -> void:
 	visible = not resting
 	set_physics_process(true)
 	if not was_active:
-		global_position = world_controller.clamp_point_to_land(home_position + Vector2(0.0, 58.0), player.global_position)
+		global_position = world_controller.clamp_point_to_land(home_position, player.global_position)
 		command_mode = CommandMode.FOLLOW
 		has_command_target = false
 		_update_mode_label()
@@ -150,7 +152,7 @@ func set_selected(value: bool) -> void:
 func send_to_rest(world_position: Vector2) -> bool:
 	if not active:
 		return false
-	rest_target = world_controller.clamp_point_to_land(world_position + Vector2(0.0, 46.0), global_position)
+	rest_target = world_controller.clamp_point_to_land(world_position, global_position)
 	going_to_rest = true
 	resting = false
 	visible = true

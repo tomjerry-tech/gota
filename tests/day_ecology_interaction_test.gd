@@ -15,7 +15,6 @@ func _run_test() -> void:
 	var dogs: Node = scene.get_node("DogManager")
 	var player: AnimatedSprite2D = scene.get_node("Island/Shepherd")
 	var command_bar: Control = scene.get_node("HUD/DogCommandBar")
-	var info_panel: Control = scene.get_node("HUD/ContextInfoPanel")
 	var building_panel: Control = scene.get_node("HUD/BuildingInteractionPanel")
 	var routine: Node = scene.get_node("DayRoutineManager")
 	var story: Node = scene.get_node("StoryEventManager")
@@ -53,8 +52,8 @@ func _run_test() -> void:
 		return
 	var second_dog: AnimatedSprite2D = dogs.get_dogs()[1]
 	scene.select_entity(second_dog)
-	if not command_bar.visible or command_bar.dog != second_dog or "牧羊犬 2" not in info_panel.title_label.text:
-		_fail("Click selection did not bind the command and information bars to dog two")
+	if not command_bar.visible or command_bar.dog != second_dog or "牧羊犬 2" not in command_bar.title_label.text:
+		_fail("Click selection did not bind the command bar to dog two")
 		return
 
 	scene.select_entity(player)
@@ -76,12 +75,19 @@ func _run_test() -> void:
 		return
 	var fence: Node2D = controller.get_fence_roots()[0]
 	var gate: Node2D = fence.get_node("Gate")
+	var gates: Array[Node2D] = controller.get_fence_gates(fence)
+	if gates.size() != 4:
+		_fail("A new enclosure did not create four gates")
+		return
 	var gate_sprite: Sprite2D = gate.get_node("Sprite")
 	if not gate_sprite.texture.resource_path.ends_with("fence_gate.png"):
 		_fail("Fence gate still uses the ordinary fence sprite")
 		return
 	if not controller.toggle_gate_at(gate.global_position + Vector2(18, 0)) or not bool(fence.get_meta("gate_open", false)):
 		_fail("Clicking the visible gate did not open it")
+		return
+	if controller.get_fence_gate_states(fence).count(true) != 1:
+		_fail("Clicking one gate also changed another gate")
 		return
 	if not controller.toggle_gate_at(gate.global_position + Vector2(18, 0)) or bool(fence.get_meta("gate_open", false)):
 		_fail("Clicking the visible gate a second time did not close it")

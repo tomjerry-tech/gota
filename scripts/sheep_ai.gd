@@ -2,6 +2,7 @@ extends AnimatedSprite2D
 
 signal health_changed(sheep: Node, healthy: bool)
 signal breeding_state_changed(sheep: Node)
+signal died(sheep: Node)
 
 enum State {
 	IDLE,
@@ -89,6 +90,7 @@ var avoidance_time := 0.0
 var avoidance_switches := 0
 var age_days := 0
 var sick := false
+var sick_days := 0
 var medical_icon: Sprite2D
 var lost := false
 var lost_icon: Label
@@ -228,6 +230,7 @@ func get_save_data() -> Dictionary:
 		"sex": String(sex),
 		"age_days": age_days,
 		"sick": sick,
+		"sick_days": sick_days,
 		"hunger": hunger,
 		"hunger_rate": hunger_rate,
 		"lost": lost,
@@ -254,6 +257,7 @@ func restore_save_data(data: Dictionary) -> void:
 	age_days = maxi(0, int(data.get("age_days", starting_age_days)))
 	starting_age_days = age_days
 	sick = bool(data.get("sick", false))
+	sick_days = clampi(int(data.get("sick_days", 0)), 0, 2) if sick else 0
 	hunger = clampf(float(data.get("hunger", 0.0)), 0.0, 100.0)
 	hunger_rate = maxf(0.01, float(data.get("hunger_rate", 100.0 / 150.0)))
 	lost = bool(data.get("lost", false))
@@ -352,6 +356,16 @@ func make_sick() -> bool:
 	return true
 
 
+func get_sick_days() -> int:
+	return sick_days
+
+
+func get_sickness_deadline_text() -> String:
+	if not sick:
+		return "健康"
+	return "明日死亡" if sick_days >= 1 else "剩余 2 天治疗"
+
+
 func treat() -> bool:
 	if not sick:
 		return false
@@ -361,6 +375,10 @@ func treat() -> bool:
 
 func daily_health_check(lamb_sickness_chance: float, recovery_chance := 0.35) -> void:
 	if sick:
+		sick_days += 1
+		if sick_days >= 2:
+			died.emit(self)
+			return
 		if random.randf() < recovery_chance:
 			_set_sick(false)
 	elif not is_adult() and random.randf() < lamb_sickness_chance:
@@ -371,6 +389,7 @@ func _set_sick(value: bool) -> void:
 	if sick == value:
 		return
 	sick = value
+	sick_days = 0
 	if medical_icon:
 		medical_icon.visible = sick
 	health_changed.emit(self, not sick)

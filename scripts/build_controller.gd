@@ -340,11 +340,30 @@ func get_building_at(world_position: Vector2) -> Node2D:
 	return null
 
 
+func get_building_entrance_position(building: Node2D, clearance := 24.0) -> Vector2:
+	if not is_instance_valid(building):
+		return Vector2.ZERO
+	var footprints := _get_target_footprints(building)
+	if footprints.is_empty():
+		return world_controller.clamp_point_to_land(building.global_position, world_controller.LAND_ORIGIN)
+	var footprint: Rect2 = footprints[0]
+	var candidates: Array[Vector2] = [
+		Vector2(footprint.get_center().x, footprint.end.y + clearance),
+		Vector2(footprint.end.x + clearance, footprint.get_center().y),
+		Vector2(footprint.position.x - clearance, footprint.get_center().y),
+		Vector2(footprint.get_center().x, footprint.position.y - clearance),
+	]
+	for candidate in candidates:
+		if world_controller.is_point_on_land(candidate, 16.0):
+			return candidate
+	return world_controller.clamp_point_to_land(candidates[0], building.global_position)
+
+
 func toggle_gate_at(world_position: Vector2, maximum_distance := 34.0) -> bool:
 	var info := get_nearest_gate_info(world_position, maximum_distance)
 	if info.is_empty():
 		return false
-	return set_gate_open(info.fence, not bool(info.is_open), true)
+	return set_specific_gate_open(info.fence, info.gate, not bool(info.is_open), true)
 
 
 func try_expand_land_at(world_position: Vector2) -> bool:
@@ -398,6 +417,7 @@ func get_save_data() -> Array[Dictionary]:
 			var grazing_rect: Rect2 = building.get_meta("grazing_rect", Rect2())
 			entry.fence_rect = _rect_to_array(grazing_rect.grow(14.0))
 			entry.gate_open = bool(building.get_meta("gate_open", false))
+			entry.gate_states = get_fence_gate_states(building)
 		result.append(entry)
 	return result
 
@@ -415,11 +435,12 @@ func restore_save_data(data: Variant) -> void:
 		if item_id == &"fence":
 			var fence_rect := _array_to_rect(entry.get("fence_rect", []))
 			if fence_rect.size.x >= GRID_SIZE and fence_rect.size.y >= GRID_SIZE:
+				var saved_gate_states: Variant = entry.get("gate_states", entry.get("gate_open", false))
 				_create_fence(
 					fence_rect,
 					int(entry.get("cost", 0)),
 					false,
-					bool(entry.get("gate_open", false)),
+					saved_gate_states,
 					clampi(int(entry.get("level", 1)), 1, MAX_BUILDING_LEVEL)
 				)
 		elif BUILDINGS.has(item_id):
@@ -433,21 +454,33 @@ func restore_save_data(data: Variant) -> void:
 				)
 
 
-func _create_fence(fence_rect: Rect2, cost: int, emit_event: bool, gate_open := false, level := 1) -> Node2D:
+func _create_fence(fence_rect: Rect2, cost: int, emit_event: bool, gate_state_value: Variant = false, level := 1) -> Node2D:
 	var footprints := _fence_footprints(fence_rect)
-	var gate_footprint_index := _get_gate_footprint_index(fence_rect)
+	var gate_footprint_indices := _get_gate_footprint_indices(fence_rect)
+	var gate_states := _normalize_gate_states(gate_state_value)
 	var fence_root := Node2D.new()
 	fence_root.name = "Fence%d" % (buildings_root.get_child_count() + 1)
 	fence_root.set_meta("build_item_id", &"fence")
 	fence_root.set_meta("cost", cost)
 	fence_root.set_meta("footprints", footprints.duplicate())
 	fence_root.set_meta("grazing_rect", fence_rect.grow(-14.0))
-	fence_root.set_meta("gate_open", gate_open)
+	fence_root.set_meta("gate_states", gate_states.duplicate())
+	fence_root.set_meta("gate_open", gate_states.any(func(value: bool) -> bool: return value))
 	fence_root.set_meta("building_level", clampi(level, 1, MAX_BUILDING_LEVEL))
 	buildings_root.add_child(fence_root)
 	_add_fence_sprites(fence_root, fence_rect, Color.WHITE, true)
-	_add_fence_colliders(fence_root, footprints, gate_footprint_index)
-	_create_fence_gate(fence_root, footprints[gate_footprint_index], gate_open)
+	_add_fence_colliders(fence_root, footprints, gate_footprint_indices)
+	var gate_names := ["GateTop", "Gate", "GateLeft", "GateRight"]
+	var gate_rotations := [0.0, 0.0, PI * 0.5, PI * 0.5]
+	for gate_index in gate_footprint_indices.size():
+		_create_fence_gate(
+			fence_root,
+			footprints[gate_footprint_indices[gate_index]],
+			gate_index,
+			gate_names[gate_index],
+			gate_rotations[gate_index],
+			gate_states[gate_index]
+		)
 	_update_building_level_badge(fence_root)
 	placed_footprints.append_array(footprints)
 	if emit_event:
@@ -471,20 +504,22 @@ func get_fence_sheep_count(fence: Node) -> int:
 
 func get_nearest_gate_info(world_position: Vector2, maximum_distance := 92.0) -> Dictionary:
 	var nearest: Node2D
+	var nearest_gate: Node2D
 	var nearest_distance := maximum_distance
 	for fence in get_fence_roots():
-		var gate := fence.get_node_or_null("Gate") as Node2D
-		if not gate:
-			continue
-		var distance := gate.global_position.distance_to(world_position)
-		if distance <= nearest_distance:
-			nearest = fence
-			nearest_distance = distance
+		for gate in get_fence_gates(fence):
+			var distance := gate.global_position.distance_to(world_position)
+			if distance <= nearest_distance:
+				nearest = fence
+				nearest_gate = gate
+				nearest_distance = distance
 	if not nearest:
 		return {}
 	return {
 		"fence": nearest,
-		"is_open": bool(nearest.get_meta("gate_open", false)),
+		"gate": nearest_gate,
+		"gate_index": int(nearest_gate.get_meta("gate_index", 0)),
+		"is_open": bool(nearest_gate.get_meta("is_open", false)),
 		"sheep_count": get_fence_sheep_count(nearest),
 	}
 
@@ -494,9 +529,9 @@ func toggle_nearest_gate(world_position: Vector2, maximum_distance := 72.0) -> b
 	if info.is_empty():
 		return false
 	var fence: Node2D = info.fence
-	set_gate_open(fence, not bool(info.is_open), true)
+	set_specific_gate_open(fence, info.gate, not bool(info.is_open), true)
 	_show_status("围栏门已%s，圈内有 %d 只羊" % [
-		"打开" if bool(fence.get_meta("gate_open", false)) else "关闭",
+		"打开" if not bool(info.is_open) else "关闭",
 		get_fence_sheep_count(fence),
 	])
 	return true
@@ -505,17 +540,61 @@ func toggle_nearest_gate(world_position: Vector2, maximum_distance := 72.0) -> b
 func set_gate_open(fence: Node2D, is_open: bool, emit_event := false) -> bool:
 	if not is_instance_valid(fence) or fence.get_meta("build_item_id", &"") != &"fence":
 		return false
-	var gate := fence.get_node_or_null("Gate") as Node2D
-	if not gate:
+	var gates := get_fence_gates(fence)
+	if gates.is_empty():
 		return false
+	for gate in gates:
+		_apply_gate_state(gate, is_open)
+	fence.set_meta("gate_states", [is_open, is_open, is_open, is_open])
 	fence.set_meta("gate_open", is_open)
-	gate.rotation = -PI * 0.5 if is_open else 0.0
-	var shape := gate.get_node_or_null("Collision/CollisionShape2D") as CollisionShape2D
-	if shape:
-		shape.disabled = is_open
 	if emit_event:
 		gate_toggled.emit(fence, is_open)
 	return true
+
+
+func set_specific_gate_open(fence: Node2D, gate_value: Variant, is_open: bool, emit_event := false) -> bool:
+	if not is_instance_valid(fence) or fence.get_meta("build_item_id", &"") != &"fence":
+		return false
+	var gates := get_fence_gates(fence)
+	var gate: Node2D
+	if gate_value is Node2D and gate_value in gates:
+		gate = gate_value as Node2D
+	elif gate_value is int and int(gate_value) >= 0 and int(gate_value) < gates.size():
+		gate = gates[int(gate_value)]
+	if not gate:
+		return false
+	_apply_gate_state(gate, is_open)
+	var states := get_fence_gate_states(fence)
+	states[int(gate.get_meta("gate_index", 0))] = is_open
+	fence.set_meta("gate_states", states.duplicate())
+	fence.set_meta("gate_open", states.any(func(value: bool) -> bool: return value))
+	if emit_event:
+		gate_toggled.emit(fence, is_open)
+	return true
+
+
+func get_fence_gates(fence: Node) -> Array[Node2D]:
+	var result: Array[Node2D] = []
+	if not is_instance_valid(fence):
+		return result
+	for child in fence.get_children():
+		if child is Node2D and child.has_meta("gate_index"):
+			result.append(child as Node2D)
+	result.sort_custom(func(first: Node2D, second: Node2D) -> bool:
+		return int(first.get_meta("gate_index", 0)) < int(second.get_meta("gate_index", 0))
+	)
+	return result
+
+
+func get_fence_gate_states(fence: Node) -> Array[bool]:
+	var states: Array[bool] = [false, false, false, false]
+	if not is_instance_valid(fence):
+		return states
+	for gate in get_fence_gates(fence):
+		var index := int(gate.get_meta("gate_index", 0))
+		if index >= 0 and index < states.size():
+			states[index] = bool(gate.get_meta("is_open", false))
+	return states
 
 
 func _create_building(item_id: StringName, build_position: Vector2, emit_event: bool, level := 1) -> Node2D:
@@ -774,15 +853,17 @@ func _add_fence_sprites(parent: Node2D, fence_rect: Rect2, tint: Color, reserve_
 	var horizontal_count := maxi(1, roundi(fence_rect.size.x / GRID_SIZE))
 	var vertical_count := maxi(1, roundi(fence_rect.size.y / GRID_SIZE))
 	var gate_column := horizontal_count / 2
+	var gate_row := vertical_count / 2
 	for index in horizontal_count:
 		var x := fence_rect.position.x + GRID_SIZE * (index + 0.5)
-		parent.add_child(_make_fence_sprite(Vector2(x, fence_rect.position.y), 0.0, tint))
 		if not reserve_gate or index != gate_column:
+			parent.add_child(_make_fence_sprite(Vector2(x, fence_rect.position.y), 0.0, tint))
 			parent.add_child(_make_fence_sprite(Vector2(x, fence_rect.end.y), 0.0, tint))
 	for index in vertical_count:
 		var y := fence_rect.position.y + GRID_SIZE * (index + 0.5)
-		parent.add_child(_make_fence_sprite(Vector2(fence_rect.position.x, y), PI * 0.5, tint))
-		parent.add_child(_make_fence_sprite(Vector2(fence_rect.end.x, y), PI * 0.5, tint))
+		if not reserve_gate or index != gate_row:
+			parent.add_child(_make_fence_sprite(Vector2(fence_rect.position.x, y), PI * 0.5, tint))
+			parent.add_child(_make_fence_sprite(Vector2(fence_rect.end.x, y), PI * 0.5, tint))
 
 
 func _make_fence_sprite(build_position: Vector2, rotation_value: float, tint: Color) -> Sprite2D:
@@ -795,9 +876,9 @@ func _make_fence_sprite(build_position: Vector2, rotation_value: float, tint: Co
 	return sprite
 
 
-func _add_fence_colliders(parent: Node2D, footprints: Array[Rect2], skipped_index := -1) -> void:
+func _add_fence_colliders(parent: Node2D, footprints: Array[Rect2], skipped_indices: Array[int] = []) -> void:
 	for index in footprints.size():
-		if index == skipped_index:
+		if index in skipped_indices:
 			continue
 		var footprint := footprints[index]
 		var body := StaticBody2D.new()
@@ -813,21 +894,30 @@ func _add_fence_colliders(parent: Node2D, footprints: Array[Rect2], skipped_inde
 		parent.add_child(body)
 
 
-func _create_fence_gate(parent: Node2D, footprint: Rect2, is_open: bool) -> Node2D:
+func _create_fence_gate(
+	parent: Node2D,
+	footprint: Rect2,
+	gate_index: int,
+	gate_name: String,
+	closed_rotation: float,
+	is_open: bool
+) -> Node2D:
 	var gate := Node2D.new()
-	gate.name = "Gate"
-	gate.position = footprint.position + Vector2(0.0, footprint.size.y * 0.5)
+	gate.name = gate_name
+	gate.position = footprint.get_center()
+	gate.set_meta("gate_index", gate_index)
+	gate.set_meta("closed_rotation", closed_rotation)
 	parent.add_child(gate)
 	var sprite := Sprite2D.new()
 	sprite.name = "Sprite"
 	sprite.texture = FENCE_GATE_TEXTURE
-	sprite.position = Vector2(footprint.size.x * 0.5, 0.0)
+	sprite.position = Vector2.ZERO
 	sprite.scale = Vector2(0.55, 0.55)
 	sprite.z_index = 6
 	gate.add_child(sprite)
 	var body := StaticBody2D.new()
 	body.name = "Collision"
-	body.position = Vector2(footprint.size.x * 0.5, 0.0)
+	body.position = Vector2.ZERO
 	body.collision_layer = 1
 	body.collision_mask = 1
 	var shape := CollisionShape2D.new()
@@ -837,8 +927,17 @@ func _create_fence_gate(parent: Node2D, footprint: Rect2, is_open: bool) -> Node
 	shape.shape = rectangle
 	body.add_child(shape)
 	gate.add_child(body)
-	set_gate_open(parent, is_open)
+	_apply_gate_state(gate, is_open)
 	return gate
+
+
+func _apply_gate_state(gate: Node2D, is_open: bool) -> void:
+	gate.set_meta("is_open", is_open)
+	var closed_rotation := float(gate.get_meta("closed_rotation", 0.0))
+	gate.rotation = closed_rotation - PI * 0.5 if is_open else closed_rotation
+	var shape := gate.get_node_or_null("Collision/CollisionShape2D") as CollisionShape2D
+	if shape:
+		shape.disabled = is_open
 
 
 func _add_building_collider(parent: Node2D, footprint_size: Vector2) -> void:
@@ -876,9 +975,28 @@ func _fence_segment_count(fence_rect: Rect2) -> int:
 	return (horizontal_count + vertical_count) * 2
 
 
-func _get_gate_footprint_index(fence_rect: Rect2) -> int:
+func _get_gate_footprint_indices(fence_rect: Rect2) -> Array[int]:
 	var horizontal_count := maxi(1, roundi(fence_rect.size.x / GRID_SIZE))
-	return (horizontal_count / 2) * 2 + 1
+	var vertical_count := maxi(1, roundi(fence_rect.size.y / GRID_SIZE))
+	var horizontal_center := horizontal_count / 2
+	var vertical_center := vertical_count / 2
+	var vertical_start := horizontal_count * 2
+	return [
+		horizontal_center * 2,
+		horizontal_center * 2 + 1,
+		vertical_start + vertical_center * 2,
+		vertical_start + vertical_center * 2 + 1,
+	]
+
+
+func _normalize_gate_states(value: Variant) -> Array[bool]:
+	var result: Array[bool] = [false, false, false, false]
+	if value is Array:
+		for index in mini(result.size(), value.size()):
+			result[index] = bool(value[index])
+	else:
+		result.fill(bool(value))
+	return result
 
 
 func _fence_footprints(fence_rect: Rect2) -> Array[Rect2]:

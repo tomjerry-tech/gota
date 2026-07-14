@@ -19,7 +19,7 @@ func _ready() -> void:
 	routine_manager.guidance_changed.connect(_on_guidance_changed)
 	lost_sheep_manager.mission_changed.connect(_refresh_display)
 	routine_manager.last_guidance_key = ""
-	routine_manager._refresh_guidance()
+	routine_manager.call_deferred("_refresh_guidance")
 	_refresh_display()
 
 
@@ -69,7 +69,7 @@ func _build_interface() -> void:
 	panel.add_child(title_label)
 	body_label = Label.new()
 	body_label.position = Vector2(70, 33)
-	body_label.size = Vector2(236, 42)
+	body_label.size = Vector2(236, 58)
 	body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body_label.add_theme_font_size_override("font_size", 13)
 	body_label.add_theme_color_override("font_color", Color("49362b"))

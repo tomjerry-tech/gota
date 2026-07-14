@@ -27,6 +27,7 @@ const WHISTLE_TEXTURE: Texture2D = preload("res://assets/tiny_swords/shepherd/sh
 const MAX_STAMINA := 100.0
 const LOW_STAMINA_THRESHOLD := 25.0
 const DAWN_RECOVERY := 25.0
+const DISPLAY_SCALE := Vector2(1.2, 1.2)
 
 @export_range(40.0, 160.0, 1.0) var walk_speed := 78.0
 @export_range(80.0, 260.0, 1.0) var run_speed := 132.0
@@ -59,6 +60,7 @@ var stamina := MAX_STAMINA
 
 
 func _ready() -> void:
+	scale = DISPLAY_SCALE
 	movement_shape.radius = collision_radius
 	_build_animations()
 	_build_context_label()
@@ -170,7 +172,7 @@ func stop_auto_roundup() -> void:
 func send_to_rest(world_position: Vector2) -> bool:
 	if resting:
 		return false
-	rest_target = world_controller.clamp_point_to_land(world_position + Vector2(0.0, 52.0), global_position)
+	rest_target = world_controller.clamp_point_to_land(world_position, global_position)
 	going_to_rest = true
 	has_movement_target = false
 	auto_roundup_fence = null

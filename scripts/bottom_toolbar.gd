@@ -2,17 +2,19 @@ extends Control
 
 signal tab_selected(tab_name: StringName)
 
-const TAB_NAMES := [&"build", &"sheep", &"medical"]
+const TAB_NAMES := [&"build", &"sheep", &"medical", &"help"]
 
 @onready var buttons: Array[TextureButton] = [
 	$Paper/BuildButton,
 	$Paper/SheepButton,
 	$Paper/MedicalButton,
+	$Paper/HelpButton,
 ]
 @onready var build_menu: Control = get_node_or_null("../BuildMenu")
 @onready var sheep_menu: Control = get_node_or_null("../SheepMenu")
 @onready var sheep_detail_menu: Control = get_node_or_null("../SheepDetailMenu")
 @onready var medical_menu: Control = get_node_or_null("../MedicalMenu")
+@onready var help_menu: Control = get_node_or_null("../HelpMenu")
 
 var selected_index := -1
 
@@ -54,6 +56,11 @@ func _select_tab(index: int) -> void:
 			medical_menu.open_menu()
 		else:
 			medical_menu.close_menu()
+	if help_menu:
+		if TAB_NAMES[index] == &"help":
+			help_menu.open_menu()
+		else:
+			help_menu.close_menu()
 	tab_selected.emit(TAB_NAMES[index])
 
 

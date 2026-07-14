@@ -5,6 +5,7 @@ signal sheep_sold(count: int)
 signal breeding_started(mother: Node, father: Node)
 signal lamb_born(lamb: Node, mother: Node)
 signal selection_changed(entity: Variant)
+signal sheep_died(sheep: Node)
 
 const PICK_RADIUS_SQUARED := 38.0 * 38.0
 const DRAG_THRESHOLD_SQUARED := 8.0 * 8.0
@@ -93,6 +94,8 @@ func _ready() -> void:
 	_assign_initial_sheep_ids()
 	_assign_initial_sheep_names()
 	_assign_initial_sheep_sexes()
+	for sheep in sheep_group.get_children():
+		_connect_sheep_lifecycle(sheep)
 	if sheep_group.get_child_count() > 0:
 		sheep_template = sheep_group.get_child(0).duplicate() as AnimatedSprite2D
 	_initialize_initial_grass()
@@ -307,6 +310,7 @@ func add_lamb(emit_added_signal := true) -> Node:
 	spawn_random.seed = Time.get_ticks_usec() + next_sheep_id * 3571
 	lamb.position = get_random_land_position(spawn_random)
 	sheep_group.add_child(lamb)
+	_connect_sheep_lifecycle(lamb)
 	_update_sheep_activity_bounds()
 	if emit_added_signal:
 		sheep_added.emit(1)
@@ -370,6 +374,32 @@ func sell_specific_sheep(sheep_to_sell: Array[Node]) -> int:
 		sheep.queue_free()
 	sheep_sold.emit(sheep_to_sell.size())
 	return sheep_to_sell.size()
+
+
+func _connect_sheep_lifecycle(sheep: Node) -> void:
+	if sheep.has_signal("died") and not sheep.died.is_connected(_on_sheep_died):
+		sheep.died.connect(_on_sheep_died)
+
+
+func _on_sheep_died(sheep: Node) -> void:
+	if not is_instance_valid(sheep) or sheep.is_queued_for_deletion() or sheep.get_parent() != sheep_group:
+		return
+	if sheep == dragged_sheep:
+		dragged_sheep = null
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+	if sheep == pressed_sheep:
+		pressed_sheep = null
+	if sheep == selected_entity:
+		select_entity(null)
+		var detail_menu := get_node_or_null("HUD/SheepDetailMenu")
+		if detail_menu:
+			detail_menu.close_menu()
+	if sheep.has_method("prepare_for_sale"):
+		sheep.prepare_for_sale()
+	sheep_died.emit(sheep)
+	sheep_group.remove_child(sheep)
+	sheep.queue_free()
+	_update_sheep_activity_bounds()
 
 
 func get_lamb_count() -> int:

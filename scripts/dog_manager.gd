@@ -35,7 +35,7 @@ func sync_dogs() -> void:
 		_connect_dog(dog)
 	for index in dogs.size():
 		if index < houses.size():
-			dogs[index].configure(index, houses[index].global_position)
+			dogs[index].configure(index, build_controller.get_building_entrance_position(houses[index]))
 		elif index == 0:
 			dogs[index].deactivate()
 	for index in range(dogs.size() - 1, maxi(0, houses.size() - 1), -1):
@@ -109,7 +109,7 @@ func send_dog_to_house(building: Node2D) -> bool:
 	var index: int = houses.find(building)
 	if index < 0 or index >= dogs.size():
 		return false
-	if not dogs[index].send_to_rest(building.global_position):
+	if not dogs[index].send_to_rest(build_controller.get_building_entrance_position(building)):
 		return false
 	if selected_dog == dogs[index]:
 		select_dog(null)
@@ -161,6 +161,7 @@ func _connect_dog(dog: AnimatedSprite2D) -> void:
 
 func _on_building_changed(item_id: StringName) -> void:
 	if item_id == &"dog_house":
+		sync_dogs()
 		call_deferred("sync_dogs")
 
 

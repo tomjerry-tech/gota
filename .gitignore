@@ -17,6 +17,7 @@ work/**/*.import
 work/**/*.pyc
 work/**/__pycache__/
 work/configure-gpt-image-2.ps1
+work/audio_sources/
 
 # Python cache
 **/__pycache__/

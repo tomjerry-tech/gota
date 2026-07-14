@@ -34,6 +34,13 @@ func _run_test() -> void:
 	if audio.SFX_STREAMS.size() != 10 or audio.sfx_players.size() < 8:
 		_fail("Core SFX library or overlap pool is incomplete")
 		return
+	if (
+		audio.SFX_STREAMS[&"sheep_bleat"].get_length() < 4.0
+		or audio.day_ambience_player.stream.get_length() < 30.0
+		or audio.night_ambience_player.stream.get_length() < 30.0
+	):
+		_fail("Licensed sheep or ambience recordings were replaced by short synthetic placeholders")
+		return
 	var sheep: AnimatedSprite2D = scene.sheep_group.get_child(0)
 	scene._press_sheep(sheep.global_position, Vector2(100.0, 100.0))
 	scene._release_sheep()
@@ -129,7 +136,7 @@ func _run_test() -> void:
 	await create_timer(0.35, true, false, true).timeout
 	await process_frame
 	await process_frame
-	print("PASS: music, ambience, event SFX, throttling, volume controls, and save restore")
+	print("PASS: licensed ambience and sheep recordings, event SFX, throttling, volume controls, and save restore")
 	quit(0)
 
 

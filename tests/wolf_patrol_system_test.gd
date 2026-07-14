@@ -15,7 +15,7 @@ func _run_test() -> void:
 	var dogs: Node = scene.get_node("DogManager")
 	var routine: Node = scene.get_node("DayRoutineManager")
 	var story: Node = scene.get_node("StoryEventManager")
-	var info: Control = scene.get_node("HUD/ContextInfoPanel")
+	var command_bar: Control = scene.get_node("HUD/DogCommandBar")
 	story.automatic_presentation_enabled = false
 	story.event_queue.clear()
 	story.current_event = {}
@@ -44,7 +44,8 @@ func _run_test() -> void:
 	dogs.sync_dogs()
 	var dog: AnimatedSprite2D = dogs.get_dogs()[0]
 	scene.select_entity(dog)
-	if not info.primary_button.visible or "巡查" not in info.primary_button.text or "狼迹" not in info.detail_label.text:
+	command_bar._update_action_buttons()
+	if command_bar.patrol_button.disabled or "巡查" not in command_bar.patrol_button.text:
 		_fail("Selected dog did not expose the wolf-trail patrol action")
 		return
 	var defense_before: int = int(routine.get_wolf_defense_preview(12).score)
@@ -97,7 +98,7 @@ func _run_test() -> void:
 
 	Engine.time_scale = 1.0
 	paused = false
-	print("PASS: daily wolf tracks, dog patrol, stamina cost, defense bonus, context action, story, and save restore")
+	print("PASS: daily wolf tracks, dog patrol, stamina cost, defense bonus, selected-dog action, story, and save restore")
 	quit(0)
 
 

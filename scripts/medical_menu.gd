@@ -22,6 +22,7 @@ func _ready() -> void:
 	_build_interface()
 	world_controller.sheep_added.connect(_on_flock_changed)
 	world_controller.sheep_sold.connect(_on_flock_changed)
+	world_controller.sheep_died.connect(_on_sheep_died)
 	call_deferred("_sync_sheep_connections")
 	call_deferred("_refresh")
 
@@ -94,6 +95,11 @@ func _on_flock_changed(_count: int) -> void:
 	call_deferred("_refresh")
 
 
+func _on_sheep_died(_sheep: Node) -> void:
+	call_deferred("_sync_sheep_connections")
+	call_deferred("_refresh")
+
+
 func _on_health_changed(_sheep: Node, _healthy: bool) -> void:
 	_refresh()
 
@@ -130,10 +136,11 @@ func _make_sheep_row(sheep: Node) -> Control:
 	var info := _make_label(
 		Vector2(14, 5),
 		Vector2(344, 46),
-		"%s　%d 天　%s" % [
+		"%s　%d 天　%s　%s" % [
 			sheep.get_sheep_name(),
 			sheep.get_age_days(),
 			"成年羊" if sheep.is_adult() else "幼羊",
+			sheep.get_sickness_deadline_text(),
 		],
 		16
 	)

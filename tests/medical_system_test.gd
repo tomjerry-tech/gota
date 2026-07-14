@@ -50,8 +50,39 @@ func _run_test() -> void:
 	if medical_menu.treat_sheep(sheep) or treatment_result.count != 1:
 		_fail("A healthy sheep could be treated repeatedly")
 		return
+	var doomed_sheep: Node = scene.get_node("Island/Sheep").get_child(1)
+	var death_result := {"count": 0}
+	scene.sheep_died.connect(func(_dead_sheep: Node) -> void: death_result.count += 1)
+	if not doomed_sheep.make_sick():
+		_fail("Could not prepare an untreated sick sheep")
+		return
+	doomed_sheep.daily_health_check(0.0, 0.0)
+	if doomed_sheep.get_sick_days() != 1 or doomed_sheep.get_sickness_deadline_text() != "明日死亡":
+		_fail("First untreated day did not expose the death deadline")
+		return
+	var flock_count_before: int = scene.get_sheep_count()
+	doomed_sheep.daily_health_check(0.0, 0.0)
+	if death_result.count != 1 or scene.get_sheep_count() != flock_count_before - 1:
+		_fail("A sheep did not die after two untreated day checks")
+		return
+	if scene.get_node("HUD/TopHUD").get_money() != 19940:
+		_fail("Sheep death incorrectly generated sale income")
+		return
+	if not scene.get_node("StoryEventManager").is_event_fired(&"first_sheep_death"):
+		_fail("First untreated death did not queue its one-time warning story")
+		return
+	var lost_manager: Node = scene.get_node("LostSheepManager")
+	var lost_sheep: Node = scene.sheep_group.get_child(1)
+	var money_before_lost_death: int = top_hud.get_money()
+	lost_manager.start_rescue([lost_sheep], top_hud.get_day())
+	lost_sheep.make_sick()
+	lost_sheep.daily_health_check(0.0, 0.0)
+	lost_sheep.daily_health_check(0.0, 0.0)
+	if lost_manager.has_active_rescue() or top_hud.get_money() != money_before_lost_death or lost_manager.last_reward != 0:
+		_fail("A lost sheep death incorrectly completed and rewarded its rescue mission")
+		return
 
-	print("PASS: medical tab, medicine purchase, inventory, controlled sickness, treatment, and health icon")
+	print("PASS: medicine, treatment, health icon, deadline, and two-day untreated death")
 	quit(0)
 
 

@@ -15,7 +15,7 @@ func _run_test() -> void:
 	var dogs: Node = scene.get_node("DogManager")
 	var routine: Node = scene.get_node("DayRoutineManager")
 	var story: Node = scene.get_node("StoryEventManager")
-	var info: Control = scene.get_node("HUD/ContextInfoPanel")
+	var help_menu: Control = scene.get_node("HUD/HelpMenu")
 	story.automatic_presentation_enabled = false
 	story.event_queue.clear()
 	story.fired_events.clear()
@@ -36,8 +36,8 @@ func _run_test() -> void:
 		_fail("Low-stamina story could be queued more than once")
 		return
 	scene.select_entity(player)
-	if "体力 24%" not in info.detail_label.text or "疲惫" not in info.detail_label.text:
-		_fail("Shepherd information panel did not show live stamina")
+	if scene.get_node_or_null("HUD/ContextInfoPanel") != null or "体力" not in String(help_menu.TOPICS[2].body):
+		_fail("Permanent context strip was not replaced by shepherd help")
 		return
 	player.wake_up()
 	if player.get_stamina_percent() != 49:
@@ -77,8 +77,10 @@ func _run_test() -> void:
 		_fail("Dog stamina did not affect defense or propagate the low-stamina story")
 		return
 	scene.select_entity(dog)
-	if "体力 24%" not in info.detail_label.text or "狼窝防护" not in info.detail_label.text:
-		_fail("Dog information panel did not show stamina and defense impact")
+	var command_bar: Control = scene.get_node("HUD/DogCommandBar")
+	command_bar._update_action_buttons()
+	if "24%" not in command_bar.title_label.text or "牧羊犬" not in String(help_menu.TOPICS[3].body):
+		_fail("Selected dog command bar did not show stamina or dog help is missing")
 		return
 	var tired_preview: Dictionary = routine.get_wolf_defense_preview()
 	if int(tired_preview.get("dog_score", -1)) != 4:
@@ -122,7 +124,7 @@ func _run_test() -> void:
 
 	Engine.time_scale = 1.0
 	paused = false
-	print("PASS: stamina drain, efficiency, indoor rest, dog defense, context UI, story, and save restore")
+	print("PASS: stamina drain, efficiency, indoor rest, dog defense, help UI, story, and save restore")
 	quit(0)
 
 
