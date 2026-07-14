@@ -47,6 +47,7 @@
 [ext_resource type="Script" path="res://scripts/daily_guide_panel.gd" id="45_daily_guide_panel"]
 [ext_resource type="Script" path="res://scripts/building_interaction_panel.gd" id="46_building_interaction_panel"]
 [ext_resource type="Script" path="res://scripts/lost_sheep_manager.gd" id="47_lost_sheep_manager"]
+[ext_resource type="Script" path="res://scripts/pasture_progression_manager.gd" id="48_pasture_progression"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cliff"]
 atlas = ExtResource("1_tilemap")
@@ -338,6 +339,9 @@ script = ExtResource("32_daily_task_manager")
 [node name="MarketOrderManager" type="Node" parent="."]
 script = ExtResource("41_market_order_manager")
 
+[node name="PastureProgressionManager" type="Node" parent="."]
+script = ExtResource("48_pasture_progression")
+
 [node name="StoryEventManager" type="Node" parent="."]
 script = ExtResource("35_story_event_manager")
 
@@ -464,7 +468,7 @@ anchor_right = 1.0
 offset_left = -430.0
 offset_top = 120.0
 offset_right = -18.0
-offset_bottom = 278.0
+offset_bottom = 338.0
 grow_horizontal = 0
 pivot_offset = Vector2(412, 0)
 scale = Vector2(0.5, 0.5)

@@ -39,16 +39,22 @@ func open_for_building(building: Node2D) -> void:
 			other.close_menu()
 	var item_id: StringName = building.get_meta("build_item_id", &"")
 	title_label.text = {
+		&"fence": "木围栏",
 		&"dog_house": "牧羊犬小屋",
 		&"shepherd_house": "牧民小屋",
 		&"lamb_shelter": "小羊棚",
 	}.get(item_id, "牧场建筑")
 	detail_label.text = {
+		&"fence": "围栏用于圈定放牧区。升级后，关闭大门会为狼窝夜间结算提供额外防护。",
 		&"dog_house": "每座狗窝对应一只牧羊犬。夜间完成休息后，犬只次日恢复满体力。",
 		&"shepherd_house": "牧羊人的生活小屋。夜间完成休息后，牧羊人次日恢复满体力。",
 		&"lamb_shelter": "保护幼羊并增加牧场容量。夜间可安排当前全部幼羊进棚休息。",
 	}.get(item_id, "这座建筑暂时没有可用的夜间操作。")
-	feedback_label.text = "当前是夜间，可以安排休息。" if top_hud.is_night() else "等到夜间后可以使用休息功能。"
+	rest_button.visible = item_id != &"fence"
+	feedback_label.text = (
+		"点击升级可以加固整圈围栏。"
+		if item_id == &"fence" else ("当前是夜间，可以安排休息。" if top_hud.is_night() else "等到夜间后可以使用休息功能。")
+	)
 	_refresh_upgrade_controls()
 	show()
 

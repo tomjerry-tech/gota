@@ -44,6 +44,7 @@ const BUILDINGS := {
 	},
 }
 const UPGRADE_COSTS := {
+	&"fence": {2: 300, 3: 600},
 	&"dog_house": {2: 500, 3: 900},
 	&"shepherd_house": {2: 700, 3: 1200},
 	&"lamb_shelter": {2: 600, 3: 1000},
@@ -304,12 +305,14 @@ func try_upgrade_building(building: Node2D) -> Dictionary:
 	building.set_meta("building_level", next_level)
 	_update_building_level_badge(building)
 	building_upgraded.emit(building, item_id, next_level)
-	return {"success": true, "message": "%s已升级到 Lv.%d" % [BUILDINGS[item_id].display_name, next_level]}
+	return {"success": true, "message": "%s已升级到 Lv.%d" % [_item_display_name(item_id), next_level]}
 
 
 func get_upgrade_effect_text(building: Node) -> String:
 	var level := get_building_level(building)
 	match building.get_meta("build_item_id", &""):
+		&"fence":
+			return "关闭大门时提供 +%d 夜间防护" % ((level - 1) * 3)
 		&"dog_house":
 			return "未进屋恢复 %d 点；守夜额外 +%d 分" % [[25, 40, 55][level - 1], (level - 1) * 2]
 		&"shepherd_house":
@@ -319,12 +322,18 @@ func get_upgrade_effect_text(building: Node) -> String:
 	return ""
 
 
+func get_fence_upgrade_defense_points() -> int:
+	var points := 0
+	for fence in get_fence_roots():
+		if not bool(fence.get_meta("gate_open", false)):
+			points += (get_building_level(fence) - 1) * 3
+	return mini(12, points)
+
+
 func get_building_at(world_position: Vector2) -> Node2D:
 	var children := buildings_root.get_children()
 	for index in range(children.size() - 1, -1, -1):
 		var building := children[index] as Node2D
-		if building.get_meta("build_item_id", &"") == &"fence":
-			continue
 		for footprint in _get_target_footprints(building):
 			if footprint.grow(8.0).has_point(world_position):
 				return building
@@ -410,7 +419,8 @@ func restore_save_data(data: Variant) -> void:
 					fence_rect,
 					int(entry.get("cost", 0)),
 					false,
-					bool(entry.get("gate_open", false))
+					bool(entry.get("gate_open", false)),
+					clampi(int(entry.get("level", 1)), 1, MAX_BUILDING_LEVEL)
 				)
 		elif BUILDINGS.has(item_id):
 			var saved_position: Variant = entry.get("position", [])
@@ -423,7 +433,7 @@ func restore_save_data(data: Variant) -> void:
 				)
 
 
-func _create_fence(fence_rect: Rect2, cost: int, emit_event: bool, gate_open := false) -> Node2D:
+func _create_fence(fence_rect: Rect2, cost: int, emit_event: bool, gate_open := false, level := 1) -> Node2D:
 	var footprints := _fence_footprints(fence_rect)
 	var gate_footprint_index := _get_gate_footprint_index(fence_rect)
 	var fence_root := Node2D.new()
@@ -433,10 +443,12 @@ func _create_fence(fence_rect: Rect2, cost: int, emit_event: bool, gate_open := 
 	fence_root.set_meta("footprints", footprints.duplicate())
 	fence_root.set_meta("grazing_rect", fence_rect.grow(-14.0))
 	fence_root.set_meta("gate_open", gate_open)
+	fence_root.set_meta("building_level", clampi(level, 1, MAX_BUILDING_LEVEL))
 	buildings_root.add_child(fence_root)
 	_add_fence_sprites(fence_root, fence_rect, Color.WHITE, true)
 	_add_fence_colliders(fence_root, footprints, gate_footprint_index)
 	_create_fence_gate(fence_root, footprints[gate_footprint_index], gate_open)
+	_update_building_level_badge(fence_root)
 	placed_footprints.append_array(footprints)
 	if emit_event:
 		fence_placed.emit()
@@ -552,6 +564,9 @@ func _update_building_level_badge(building: Node2D) -> void:
 		style.set_corner_radius_all(3)
 		badge.add_theme_stylebox_override("normal", style)
 		building.add_child(badge)
+	if building.get_meta("build_item_id", &"") == &"fence":
+		var grazing_rect: Rect2 = building.get_meta("grazing_rect", Rect2())
+		badge.position = Vector2(grazing_rect.get_center().x - 27.0, grazing_rect.position.y - 34.0)
 	badge.text = "Lv.%d" % level
 	badge.show()
 
@@ -696,6 +711,12 @@ func _demolition_target_name(target: Node) -> String:
 		&"shepherd_house": return "牧民小屋"
 		&"lamb_shelter": return "小羊棚"
 		_: return "建筑"
+
+
+func _item_display_name(item_id: StringName) -> String:
+	if item_id == &"fence":
+		return "木围栏"
+	return String((BUILDINGS.get(item_id, {"display_name": "牧场建筑"}) as Dictionary).display_name)
 
 
 func _play_demolition_animation(target: Node2D, strike_position: Vector2) -> void:

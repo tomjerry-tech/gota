@@ -5,11 +5,16 @@ const HEALTHY_ADULT_GOAL := 3
 
 @onready var world_controller: Node = get_node("../..")
 @onready var top_hud: Control = get_node("../TopHUD")
+@onready var progression_manager: Node = get_node("../../PastureProgressionManager")
+@onready var right_side_panel: Control = get_node("../RightSidePanel")
 
 var title_label: Label
 var adult_goal_label: Label
 var grass_goal_label: Label
 var result_label: Label
+var third_goal_label: Label
+var fourth_goal_label: Label
+var records_button: Button
 var sufficient_grass_days := 0
 var finished := false
 var succeeded := false
@@ -18,6 +23,7 @@ var succeeded := false
 func _ready() -> void:
 	_build_interface()
 	top_hud.day_changed.connect(_on_day_changed)
+	progression_manager.progression_changed.connect(_refresh)
 	_refresh.call_deferred()
 
 
@@ -27,7 +33,7 @@ func _process(_delta: float) -> void:
 
 func get_status_summary() -> String:
 	if finished:
-		return "7 天委托：%s" % ("完成" if succeeded else "未完成")
+		return "牧场 Lv.%d：%s" % [progression_manager.get_level(), progression_manager.get_chapter_title()]
 	return "7 天委托：第 %d / 7 天" % mini(top_hud.get_day(), COMMISSION_DAYS)
 
 
@@ -44,11 +50,12 @@ func restore_save_data(data: Dictionary) -> void:
 	finished = bool(data.get("finished", false))
 	succeeded = bool(data.get("succeeded", false))
 	_refresh()
-	visible = not finished and top_hud.get_day() <= COMMISSION_DAYS
+	visible = true
 
 
 func _on_day_changed(new_day: int) -> void:
 	if finished:
+		_refresh()
 		return
 	if new_day <= COMMISSION_DAYS + 1 and _is_grass_supply_sufficient():
 		sufficient_grass_days += 1
@@ -59,8 +66,6 @@ func _on_day_changed(new_day: int) -> void:
 			and sufficient_grass_days >= COMMISSION_DAYS
 		)
 	_refresh()
-	if finished:
-		hide()
 
 
 func _is_grass_supply_sufficient() -> bool:
@@ -70,6 +75,12 @@ func _is_grass_supply_sufficient() -> bool:
 func _refresh() -> void:
 	if not title_label or not world_controller:
 		return
+	if finished or top_hud.get_day() >= COMMISSION_DAYS + 1:
+		_refresh_progression()
+		return
+	third_goal_label.hide()
+	fourth_goal_label.hide()
+	records_button.hide()
 	title_label.text = get_status_summary()
 	var healthy_adults: int = world_controller.get_healthy_adult_count()
 	adult_goal_label.text = "健康成年羊　%d / %d" % [mini(healthy_adults, HEALTHY_ADULT_GOAL), HEALTHY_ADULT_GOAL]
@@ -78,8 +89,35 @@ func _refresh() -> void:
 	grass_goal_label.add_theme_color_override("font_color", Color("35644c") if sufficient_grass_days >= COMMISSION_DAYS else Color("49362b"))
 	result_label.text = "委托完成" if succeeded else ("委托未完成" if finished else "")
 	result_label.add_theme_color_override("font_color", Color("35644c") if succeeded else Color("a33b32"))
-	if finished and top_hud.get_day() >= COMMISSION_DAYS + 1:
-		hide()
+
+
+func _refresh_progression() -> void:
+	third_goal_label.show()
+	fourth_goal_label.show()
+	records_button.show()
+	title_label.text = "牧场 Lv.%d　%s" % [progression_manager.get_level(), progression_manager.get_level_progress_text()]
+	adult_goal_label.text = progression_manager.get_chapter_title()
+	adult_goal_label.add_theme_color_override("font_color", Color("294b5b"))
+	var labels: Array[Label] = [grass_goal_label, third_goal_label, fourth_goal_label]
+	var objectives: Array[Dictionary] = progression_manager.get_chapter_objectives()
+	for index in labels.size():
+		if index >= objectives.size():
+			labels[index].text = "全部章节目标已经完成" if index == 0 else ""
+			labels[index].add_theme_color_override("font_color", Color("35644c"))
+			continue
+		var objective: Dictionary = objectives[index]
+		labels[index].text = "%s　%d / %d" % [objective.label, objective.current, objective.target]
+		labels[index].add_theme_color_override("font_color", Color("35644c") if objective.completed else Color("49362b"))
+	result_label.text = (
+		"全部章节完成"
+		if progression_manager.get_current_chapter() > progression_manager.CHAPTER_TITLES.size()
+		else "本章奖励 %d 金币" % progression_manager.CHAPTER_REWARDS[progression_manager.get_current_chapter() - 1]
+	)
+	result_label.add_theme_color_override("font_color", Color("8b5b24"))
+
+
+func _open_records() -> void:
+	right_side_panel.show_records(progression_manager)
 
 
 func _build_interface() -> void:
@@ -90,13 +128,24 @@ func _build_interface() -> void:
 	title_label = _make_label(Vector2(18, 12), Vector2(374, 34), 22)
 	title_label.add_theme_color_override("font_color", Color("294b5b"))
 	panel.add_child(title_label)
-	adult_goal_label = _make_label(Vector2(22, 54), Vector2(366, 30), 17)
+	adult_goal_label = _make_label(Vector2(22, 50), Vector2(366, 28), 17)
 	panel.add_child(adult_goal_label)
-	grass_goal_label = _make_label(Vector2(22, 88), Vector2(366, 30), 17)
+	grass_goal_label = _make_label(Vector2(22, 80), Vector2(366, 26), 16)
 	panel.add_child(grass_goal_label)
-	result_label = _make_label(Vector2(22, 120), Vector2(366, 30), 17)
+	third_goal_label = _make_label(Vector2(22, 108), Vector2(366, 26), 16)
+	panel.add_child(third_goal_label)
+	fourth_goal_label = _make_label(Vector2(22, 136), Vector2(366, 26), 16)
+	panel.add_child(fourth_goal_label)
+	result_label = _make_label(Vector2(22, 170), Vector2(268, 30), 15)
 	result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	panel.add_child(result_label)
+	records_button = Button.new()
+	records_button.position = Vector2(300, 168)
+	records_button.size = Vector2(88, 32)
+	records_button.text = "牧场档案"
+	records_button.add_theme_font_size_override("font_size", 14)
+	records_button.pressed.connect(_open_records)
+	panel.add_child(records_button)
 
 
 func _make_label(position_value: Vector2, size_value: Vector2, font_size: int) -> Label:

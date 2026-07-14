@@ -13,6 +13,7 @@ const WOLF_SAFE_SCORE := 80
 const WOLF_WARNING_SCORE := 50
 const WOLF_PATROL_DEFENSE_BONUS := 15
 const WOLF_PATROL_STAMINA_COST := 8
+const WOLF_THREAT_PENALTY_PER_LEVEL := 5
 const WOLF_DEN_TEXTURE: Texture2D = preload("res://assets/tiny_swords/wolf/wolf_den.png")
 
 @onready var world_controller: Node = get_parent()
@@ -206,8 +207,13 @@ func get_wolf_defense_preview(for_day := 0) -> Dictionary:
 	var gate_score := roundi(20.0 * float(closed_gates) / float(fences.size())) if not fences.is_empty() else 0
 	var dog_score := mini(20, dog_manager.get_total_night_defense_points())
 	var patrol_score := WOLF_PATROL_DEFENSE_BONUS if wolf_patrol_bonus_day == defense_day else 0
+	var fence_upgrade_score: int = build_controller.get_fence_upgrade_defense_points()
+	var threat_level: int = get_wolf_threat_level(defense_day)
+	var threat_penalty: int = maxi(0, threat_level - 1) * WOLF_THREAT_PENALTY_PER_LEVEL
+	var raw_score: int = clampi(secured_score + gate_score + dog_score + patrol_score + fence_upgrade_score, 0, 100)
 	return {
-		"score": clampi(secured_score + gate_score + dog_score + patrol_score, 0, 100),
+		"score": clampi(raw_score - threat_penalty, 0, 100),
+		"raw_score": raw_score,
 		"secured_count": secured_count,
 		"sheep_count": sheep_count,
 		"closed_gates": closed_gates,
@@ -215,19 +221,35 @@ func get_wolf_defense_preview(for_day := 0) -> Dictionary:
 		"dog_count": dog_count,
 		"dog_score": dog_score,
 		"patrol_score": patrol_score,
+		"fence_upgrade_score": fence_upgrade_score,
+		"threat_level": threat_level,
+		"threat_penalty": threat_penalty,
 	}
+
+
+func get_wolf_threat_level(for_day := 0) -> int:
+	if not wolf_den_found:
+		return 0
+	var threat_day: int = top_hud.get_day() if for_day <= 0 else for_day
+	var elapsed_component := floori(float(maxi(0, threat_day - wolf_den_discovered_day)) / 7.0)
+	var land_component := floori(float(maxi(0, world_controller.get_land_chunk_count() - 3)) / 2.0)
+	var flock_component := floori(float(maxi(0, world_controller.get_sheep_count() - 6)) / 10.0)
+	return clampi(1 + elapsed_component + land_component + flock_component, 1, 5)
 
 
 func get_wolf_risk_report_text(ended_day: int) -> String:
 	var result := evaluate_wolf_night_risk(ended_day)
 	if result.is_empty() or not bool(result.get("active", false)):
 		return "未发生（尚未发现狼窝）"
-	var defense_text := "防护 %d，安全安置 %d / %d，关门 %d / %d，牧羊犬 %d（%d 分），狼迹巡查 +%d" % [
+	var defense_text := "威胁 Lv.%d（-%d），防护 %d，安全安置 %d / %d，关门 %d / %d，围栏加固 +%d，牧羊犬 %d（%d 分），狼迹巡查 +%d" % [
+		int(result.get("threat_level", 0)),
+		int(result.get("threat_penalty", 0)),
 		int(result.get("score", 0)),
 		int(result.get("secured_count", 0)),
 		int(result.get("sheep_count", 0)),
 		int(result.get("closed_gates", 0)),
 		int(result.get("gate_count", 0)),
+		int(result.get("fence_upgrade_score", 0)),
 		int(result.get("dog_count", 0)),
 		int(result.get("dog_score", 0)),
 		int(result.get("patrol_score", 0)),
@@ -598,7 +620,9 @@ func _refresh_guidance() -> void:
 				title = "夜间安置"
 				urgent = wolf_den_found
 				body = (
-					"当前防护 %d。赶羊入圈并关门；疲惫犬只的守夜效果会下降。" % int(get_wolf_defense_preview().score)
+					"威胁 Lv.%d，当前防护 %d。赶羊入圈、关门并保持犬只体力。" % [
+						get_wolf_threat_level(), int(get_wolf_defense_preview().score),
+					]
 					if wolf_den_found else "点击小屋安排牧羊人、牧羊犬或幼羊进屋休息。"
 				)
 	var key := "%s|%s|%s" % [title, body, str(urgent)]

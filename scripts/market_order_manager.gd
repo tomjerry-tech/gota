@@ -6,6 +6,8 @@ signal normal_sale_completed(count: int, income: int)
 signal order_completed(order_id: String, count: int, income: int)
 signal order_expired(order_id: String)
 signal bloodline_order_completed(order_id: String, count: int, income: int)
+signal merchant_chain_started(chain_id: String)
+signal merchant_chain_completed(chain_id: String, total_income: int)
 
 const DEFAULT_NORMAL_PRICE := 320
 const NORMAL_PRICE_MIN := 280
@@ -14,6 +16,8 @@ const ORDER_PRICE_MIN := 360
 const ORDER_PRICE_MAX := 460
 const BLOODLINE_PRICE_MIN := 500
 const BLOODLINE_PRICE_MAX := 620
+const SPECIAL_PRICE_MIN := 480
+const SPECIAL_PRICE_MAX := 720
 const ORDERS_PER_DAY := 2
 
 const STATUS_ACTIVE := &"active"
@@ -181,6 +185,11 @@ func deliver_order(order_id: String) -> Dictionary:
 	order_completed.emit(order.id, quantity, income)
 	if order.type == TYPE_BLOODLINE:
 		bloodline_order_completed.emit(order.id, quantity, income)
+	if bool(order.get("special", false)):
+		if int(order.get("chain_step", 0)) == 1:
+			_publish_chain_second_step(order, income)
+		else:
+			merchant_chain_completed.emit(String(order.get("chain_id", "")), int(order.get("chain_income_before", 0)) + income)
 	market_changed.emit()
 	return {
 		"success": true,
@@ -228,9 +237,15 @@ func _generate_daily_orders(day: int) -> void:
 		var temporary := templates[index]
 		templates[index] = templates[swap_index]
 		templates[swap_index] = temporary
-	for index in ORDERS_PER_DAY:
+	var publish_chain := day >= 15 and day % 5 == 0 and not _has_active_merchant_chain()
+	var regular_count := ORDERS_PER_DAY - 1 if publish_chain else ORDERS_PER_DAY
+	for index in regular_count:
 		var template: Dictionary = templates[index]
 		orders.append(_make_order(day, template.type, template.sex, random))
+	if publish_chain:
+		var chain_id := "merchant_chain_%d" % day
+		orders.append(_make_chain_order(day, 1, chain_id, random))
+		merchant_chain_started.emit(chain_id)
 
 
 func _make_order(day: int, type: StringName, required_sex: StringName, random: RandomNumberGenerator) -> Dictionary:
@@ -262,27 +277,80 @@ func _make_order(day: int, type: StringName, required_sex: StringName, random: R
 
 
 func _order_text(order: Dictionary) -> Dictionary:
+	var result: Dictionary
 	match order.type:
 		TYPE_SEX:
 			var sex_text := "公羊" if order.sex == &"male" else "母羊"
-			return {
+			result = {
 				"title": "%s采购" % sex_text,
 				"description": "%d 只健康成年%s" % [order.quantity, sex_text],
 			}
 		TYPE_YOUNG_ADULT:
-			return {
+			result = {
 				"title": "青年羊采购",
 				"description": "%d 只 6–12 天健康成年羊" % order.quantity,
 			}
 		TYPE_BLOODLINE:
-			return {
+			result = {
 				"title": "本岛血统订单",
 				"description": "%d 只第 1 代以上健康成年羊" % order.quantity,
 			}
-	return {
-		"title": "健康成年羊采购",
-		"description": "%d 只健康成年羊，公母不限" % order.quantity,
+		_:
+			result = {
+				"title": "健康成年羊采购",
+				"description": "%d 只健康成年羊，公母不限" % order.quantity,
+			}
+	if bool(order.get("special", false)):
+		result.title = "行商连单 %d/2 · %s" % [int(order.get("chain_step", 1)), result.title]
+		result.description += "；完成后继续下一批" if int(order.get("chain_step", 1)) == 1 else "；完成整组连单"
+	return result
+
+
+func _make_chain_order(day: int, step: int, chain_id: String, random: RandomNumberGenerator) -> Dictionary:
+	var type := TYPE_HEALTHY_ADULT if step == 1 else TYPE_SEX
+	var required_sex := &"" if step == 1 else (&"female" if day % 2 == 0 else &"male")
+	var unit_price := (
+		random.randi_range(SPECIAL_PRICE_MIN / 10, 540 / 10) * 10
+		if step == 1 else random.randi_range(620 / 10, SPECIAL_PRICE_MAX / 10) * 10
+	)
+	var order := {
+		"id": "%s_step_%d_%d" % [chain_id, step, next_order_serial],
+		"type": type,
+		"sex": required_sex,
+		"quantity": 1,
+		"unit_price": unit_price,
+		"created_day": day,
+		"deadline_day": day + (2 if step == 1 else 3),
+		"status": STATUS_ACTIVE,
+		"completed_day": 0,
+		"delivered_names": [],
+		"special": true,
+		"chain_id": chain_id,
+		"chain_step": step,
+		"chain_income_before": 0,
 	}
+	next_order_serial += 1
+	var text := _order_text(order)
+	order.title = text.title
+	order.description = text.description
+	return order
+
+
+func _publish_chain_second_step(first_order: Dictionary, first_income: int) -> void:
+	var random := RandomNumberGenerator.new()
+	random.seed = int(first_order.created_day) * 99991 + next_order_serial * 37
+	var next_order := _make_chain_order(
+		top_hud.get_day(), 2, String(first_order.get("chain_id", "merchant_chain")), random
+	)
+	next_order.chain_income_before = first_income
+	orders.append(next_order)
+
+
+func _has_active_merchant_chain() -> bool:
+	return orders.any(
+		func(order: Dictionary) -> bool:
+			return bool(order.get("special", false)) and order.status == STATUS_ACTIVE
+	)
 
 
 func _get_matching_sheep(order: Dictionary) -> Array[Node]:
@@ -382,11 +450,17 @@ func _is_valid_saved_order(order: Dictionary) -> bool:
 		and int(order.get("quantity", 0)) in [1, 2, 3]
 		and _is_valid_order_price(order)
 		and int(order.get("deadline_day", 0)) >= int(order.get("created_day", 0))
+		and (
+			not bool(order.get("special", false))
+			or (String(order.get("chain_id", "")) != "" and int(order.get("chain_step", 0)) in [1, 2])
+		)
 	)
 
 
 func _is_valid_order_price(order: Dictionary) -> bool:
 	var price := int(order.get("unit_price", 0))
+	if bool(order.get("special", false)):
+		return price >= SPECIAL_PRICE_MIN and price <= SPECIAL_PRICE_MAX
 	if order.type == TYPE_BLOODLINE:
 		return price >= BLOODLINE_PRICE_MIN and price <= BLOODLINE_PRICE_MAX
 	return price >= ORDER_PRICE_MIN and price <= ORDER_PRICE_MAX

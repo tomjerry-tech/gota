@@ -125,8 +125,8 @@ func _run_test() -> void:
 		_fail("Wolf den discovery did not queue its one-time warning story")
 		return
 	commission.restore_save_data({"sufficient_grass_days": 7, "finished": true, "succeeded": true})
-	if commission.visible:
-		_fail("Finished seven-day commission UI remained on screen")
+	if not commission.visible or "牧场 Lv." not in commission.title_label.text:
+		_fail("Finished seven-day commission was not replaced by pasture progression")
 		return
 
 	var day_one_pool: Array[Dictionary] = tasks._build_feasible_pool(1)

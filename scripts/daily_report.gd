@@ -11,6 +11,7 @@ const TITLE_TEXTURE := preload("res://assets/tiny_swords/ui/build_menu/title_rib
 @onready var roundup_manager: Control = get_node("../RoundupStatus")
 @onready var market_manager: Node = get_node("../../MarketOrderManager")
 @onready var day_routine_manager: Node = get_node("../../DayRoutineManager")
+@onready var progression_manager: Node = get_node("../../PastureProgressionManager")
 
 var report_title: Label
 var report_text: Label
@@ -117,7 +118,8 @@ func show_daily_report(ended_day: int) -> void:
 		risks.append("暂无明显风险")
 	report_title.text = "第 %d 天结算" % ended_day
 	report_text.text = (
-		"羊群变化　买入 %d　出生 %d　出售 %d　当前 %d / 容量 %d\n"
+		"牧场成长　Lv.%d　%s　%s\n"
+		+ "羊群变化　买入 %d　出生 %d　出售 %d　当前 %d / 容量 %d\n"
 		+ "草场情况　成熟 %d / 总数 %d\n"
 		+ "收入支出　收入 %d　支出 %d　净变化 %+d\n"
 		+ "市场明细　普通出售 %d　订单交付 %d　过期订单 %d\n"
@@ -125,6 +127,7 @@ func show_daily_report(ended_day: int) -> void:
 		+ "夜间防护　%s\n"
 		+ "风险提醒　%s"
 	) % [
+		progression_manager.get_level(), progression_manager.get_level_progress_text(), progression_manager.get_chapter_title(),
 		bought_today, born_today, sold_today, sheep_count, capacity,
 		mature_grass, total_grass,
 		finance.income, finance.expense, finance.income - finance.expense,

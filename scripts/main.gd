@@ -45,6 +45,7 @@ const SHEEP_NAME_POOL := [
 @onready var medical_menu: Control = $HUD/MedicalMenu
 @onready var daily_task_manager: Node = $DailyTaskManager
 @onready var market_order_manager: Node = $MarketOrderManager
+@onready var pasture_progression_manager: Node = $PastureProgressionManager
 @onready var story_event_manager: Node = $StoryEventManager
 @onready var newbie_commission: Control = $HUD/NewbieCommission
 @onready var daily_report: Control = $HUD/DailyReport
@@ -154,6 +155,7 @@ func get_save_data() -> Dictionary:
 		"medical": medical_menu.get_save_data(),
 		"daily_tasks": daily_task_manager.get_save_data(),
 		"market": market_order_manager.get_save_data(),
+		"pasture_progression": pasture_progression_manager.get_save_data(),
 		"newbie_commission": newbie_commission.get_save_data(),
 		"story": story_event_manager.get_save_data(),
 		"daily_report": daily_report.get_save_data(),
@@ -182,6 +184,7 @@ func restore_save_data(data: Dictionary) -> bool:
 	medical_menu.restore_save_data(data.get("medical", {}))
 	daily_task_manager.restore_save_data(data.get("daily_tasks", {}))
 	market_order_manager.restore_save_data(data.get("market", {}))
+	pasture_progression_manager.restore_save_data(data.get("pasture_progression", {}))
 	newbie_commission.restore_save_data(data.get("newbie_commission", {}))
 	daily_report.restore_save_data(data.get("daily_report", {}))
 	player.restore_save_data(data.get("player", {}))

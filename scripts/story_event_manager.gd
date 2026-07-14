@@ -15,6 +15,7 @@ signal event_finished(event_id: StringName)
 @onready var bottom_toolbar: Control = get_node("../HUD/BottomToolbar")
 @onready var sheep_menu: Control = get_node("../HUD/SheepMenu")
 @onready var market_manager: Node = get_node("../MarketOrderManager")
+@onready var progression_manager: Node = get_node("../PastureProgressionManager")
 @onready var day_routine_manager: Node = get_node("../DayRoutineManager")
 @onready var lost_sheep_manager: Node = get_node("../LostSheepManager")
 @onready var world_camera: Camera2D = get_node("../WorldCamera")
@@ -47,6 +48,11 @@ func _ready() -> void:
 	market_manager.market_viewed.connect(_on_market_viewed)
 	market_manager.order_completed.connect(_on_market_order_completed)
 	market_manager.bloodline_order_completed.connect(_on_bloodline_order_completed)
+	market_manager.merchant_chain_started.connect(_on_merchant_chain_started)
+	market_manager.merchant_chain_completed.connect(_on_merchant_chain_completed)
+	progression_manager.level_changed.connect(_on_pasture_level_changed)
+	progression_manager.chapter_completed.connect(_on_chapter_completed)
+	progression_manager.achievement_unlocked.connect(_on_achievement_unlocked)
 	world_controller.lamb_born.connect(_on_lineage_lamb_born)
 	day_routine_manager.wolf_den_discovered.connect(_on_wolf_den_discovered)
 	day_routine_manager.wolf_tracks_appeared.connect(_on_wolf_tracks_appeared)
@@ -133,6 +139,11 @@ func _on_day_changed(new_day: int) -> void:
 		queue_event(&"day_8_commission")
 	if new_day >= 20 and not is_event_fired(&"day_20_building_upgrades"):
 		queue_event(&"day_20_building_upgrades")
+	var threat_level: int = day_routine_manager.get_wolf_threat_level(new_day)
+	if threat_level >= 3:
+		queue_event(&"wolf_pressure_rising")
+	if threat_level >= 5:
+		queue_event(&"wolf_pressure_peak")
 
 
 func _on_building_placed(item_id: StringName) -> void:
@@ -182,6 +193,28 @@ func _on_market_order_completed(_order_id: String, _count: int, _income: int) ->
 
 func _on_bloodline_order_completed(_order_id: String, _count: int, _income: int) -> void:
 	queue_event(&"first_bloodline_order")
+
+
+func _on_merchant_chain_started(_chain_id: String) -> void:
+	queue_event(&"first_merchant_chain")
+
+
+func _on_merchant_chain_completed(_chain_id: String, _income: int) -> void:
+	queue_event(&"first_merchant_chain_completed")
+
+
+func _on_pasture_level_changed(level: int) -> void:
+	if level >= 5:
+		queue_event(&"pasture_level_five")
+
+
+func _on_chapter_completed(chapter: int, _reward: int) -> void:
+	if chapter == 1:
+		queue_event(&"first_chapter_completed")
+
+
+func _on_achievement_unlocked(_achievement_id: StringName, _title: String, _reward: int) -> void:
+	queue_event(&"first_achievement")
 
 
 func _on_lineage_lamb_born(lamb: Node, _mother: Node) -> void:
@@ -423,11 +456,59 @@ func _build_event_data(event_id: StringName) -> Dictionary:
 			bloodline_done.speaker = "行商人"
 			bloodline_done.subtitle = "往来小岛的牲畜商"
 			return bloodline_done
+		&"first_merchant_chain":
+			var chain_intro := _event(
+				event_id, "行商人的连单",
+				"行商人每隔一段时间会带来两步连单。\n完成第一批后才会公布第二批；整组价格更高，但仍要在截止日前交付。",
+				[{"id": &"open_market", "label": "查看连单"}, {"id": &"confirm", "label": "稍后准备"}]
+			)
+			chain_intro.speaker = "行商人"
+			chain_intro.subtitle = "往来小岛的牲畜商"
+			return chain_intro
+		&"first_merchant_chain_completed":
+			var chain_done := _event(
+				event_id, "连单全部交付",
+				"两批羊都按要求交付，行商人提高了对牧场的评价。\n连单收入和声望已经结算，之后每 5 天可能再次出现。",
+				[{"id": &"open_market", "label": "返回市场"}, {"id": &"confirm", "label": "收下报酬"}]
+			)
+			chain_done.speaker = "行商人"
+			chain_done.subtitle = "往来小岛的牲畜商"
+			return chain_done
+		&"first_chapter_completed":
+			return _event(
+				event_id, "牧场第一章完成",
+				"羊群、围栏和牧羊犬小屋已经形成稳定的经营基础。\n章节奖励已到账，右上章节摘要会自动切换到下一组目标。",
+				[{"id": &"confirm", "label": "进入下一章"}]
+			)
+		&"first_achievement":
+			return _event(
+				event_id, "第一枚牧场成就",
+				"一项长期经营记录已经达成，成就奖励自动加入金币。\n点击右上章节摘要中的“牧场档案”可以查看全部统计和成就。",
+				[{"id": &"confirm", "label": "查看记录"}]
+			)
+		&"pasture_level_five":
+			return _event(
+				event_id, "五级岛屿牧场",
+				"这座小岛已经发展成成熟牧场。\n继续培育不同家系、完成连单和守住更高等级的狼群威胁，仍能刷新经营记录。",
+				[{"id": &"confirm", "label": "继续经营"}]
+			)
 		&"wolf_den_discovered":
 			return _event(
 				event_id, "边缘土地的狼窝",
 				"牧场最外侧的狼窝出现了新的活动痕迹，夜间需要更谨慎。\n让体力充足的牧羊犬守夜，并在入夜前把羊赶入围栏、关闭大门。",
 				[{"id": &"open_build", "label": "检查建造"}, {"id": &"confirm", "label": "加强夜间防护"}]
+			)
+		&"wolf_pressure_rising":
+			return _event(
+				event_id, "狼群开始试探",
+				"牧场扩大后，外围脚印明显增多，狼群威胁会扣减一部分夜间防护。\n升级围栏、保持犬只体力并完成白天巡查，能抵消这部分压力。",
+				[{"id": &"open_build", "label": "加固围栏"}, {"id": &"confirm", "label": "今晚警戒"}]
+			)
+		&"wolf_pressure_peak":
+			return _event(
+				event_id, "外围狼群集结",
+				"日期、土地和羊群规模都已让狼群威胁达到最高等级。\n单靠一只牧羊犬已经不够，需要关闭围栏、升级设施并让多只犬保持体力。",
+				[{"id": &"open_build", "label": "检查防线"}, {"id": &"confirm", "label": "守住牧场"}]
 			)
 		&"fresh_wolf_tracks":
 			return _event(

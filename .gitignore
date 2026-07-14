@@ -26,3 +26,6 @@ work/configure-gpt-image-2.ps1
 *.tmp
 *.bak
 *.swp
+
+# Local release builds
+build/

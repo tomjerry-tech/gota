@@ -14,6 +14,7 @@ const SHEPHERD_TEXTURE: Texture2D = preload("res://assets/tiny_swords/units/blue
 var mode: StringName = &""
 var current_story_id: StringName = &""
 var task_manager: Node
+var progression_manager: Node
 var commission_was_visible := false
 var title_label: Label
 var content_root: Control
@@ -52,6 +53,22 @@ func show_story(event_data: Dictionary) -> void:
 	mode_changed.emit(mode)
 
 
+func show_records(manager: Node) -> bool:
+	if visible and mode == &"story":
+		return false
+	_prepare_open()
+	mode = &"records"
+	progression_manager = manager
+	if not progression_manager.progression_changed.is_connected(refresh_records):
+		progression_manager.progression_changed.connect(refresh_records)
+	current_story_id = &""
+	title_label.text = "牧场档案"
+	refresh_records()
+	show()
+	mode_changed.emit(mode)
+	return true
+
+
 func refresh_tasks() -> void:
 	if mode != &"tasks" or not task_manager:
 		return
@@ -70,6 +87,48 @@ func refresh_tasks() -> void:
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_color_override("font_color", Color("7d5140"))
 	content_root.add_child(hint)
+
+
+func refresh_records() -> void:
+	if mode != &"records" or not progression_manager:
+		return
+	_clear_content()
+	var summary := _make_label(
+		Vector2(10, 4), Vector2(286, 56),
+		"牧场 Lv.%d　%s\n%s" % [
+			progression_manager.get_level(), progression_manager.get_level_progress_text(),
+			progression_manager.get_chapter_title(),
+		], 16
+	)
+	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary.add_theme_color_override("font_color", Color("294b5b"))
+	content_root.add_child(summary)
+	var statistics := _make_label(
+		Vector2(10, 66), Vector2(286, 68),
+		"订单 %d　血统订单 %d　连单 %d\n出生 %d　巡查 %d　救援 %d\n最佳安全守夜 %d 晚" % [
+			progression_manager.get_stat(&"orders_completed"), progression_manager.get_stat(&"bloodline_orders"),
+			progression_manager.get_stat(&"merchant_chains"), progression_manager.get_stat(&"lambs_born"),
+			progression_manager.get_stat(&"wolf_patrols"), progression_manager.get_stat(&"rescues_completed"),
+			progression_manager.get_stat(&"best_safe_night_streak"),
+		], 13
+	)
+	statistics.add_theme_color_override("font_color", Color("49362b"))
+	content_root.add_child(statistics)
+	var achievement_title := _make_label(
+		Vector2(10, 142), Vector2(286, 26),
+		"成就 %d / %d" % [progression_manager.get_unlocked_achievement_count(), progression_manager.ACHIEVEMENTS.size()], 16
+	)
+	achievement_title.add_theme_color_override("font_color", Color("8b5b24"))
+	content_root.add_child(achievement_title)
+	var y := 174.0
+	for achievement in progression_manager.get_achievement_rows():
+		var row := _make_label(
+			Vector2(12, y), Vector2(282, 28),
+			"%s %s　+%d" % ["已完成" if achievement.unlocked else "未完成", achievement.title, achievement.reward], 13
+		)
+		row.add_theme_color_override("font_color", Color("35644c") if achievement.unlocked else Color("6d5e49"))
+		content_root.add_child(row)
+		y += 29.0
 
 
 func close_panel() -> void:
